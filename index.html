@@ -142,6 +142,20 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
 .funnel-plat-icon{width:22px;height:22px;flex-shrink:0;color:var(--accent-dark);}
 .funnel-plat-title{font-size:14px;font-weight:700;color:var(--title);}
 .funnel-mini-kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;}
+.funnel-mini-kpis.three{grid-template-columns:repeat(3,1fr);margin-bottom:0;}
+.temp-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;}
+.temp-dot-quente{background:var(--negative);}
+.temp-dot-frio{background:#3B7DD8;}
+.temp-quente{border-color:rgba(192,57,43,.35);}
+.temp-frio{border-color:rgba(59,125,216,.3);}
+.subsection-lbl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);font-weight:500;margin:22px 0 10px;}
+.subsection-lbl:first-of-type{margin-top:0;}
+.cr-thumb-cell{width:52px;}
+.cr-thumb{width:38px;height:38px;border-radius:var(--r-sm);object-fit:cover;display:block;background:var(--surface-alt);border:0.5px solid var(--divider);}
+.cr-noimg{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:var(--r-sm);background:var(--surface-alt);border:0.5px solid var(--divider);color:var(--text-muted);font-size:10px;}
+.ig-link{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:var(--r-sm);background:var(--surface-alt);border:0.5px solid var(--divider);color:var(--accent-dark);text-decoration:none;transition:all .15s;}
+.ig-link:hover{background:#E9F8E8;border-color:var(--accent);}
+.ig-link svg{width:14px;height:14px;}
 .fmk{background:var(--surface-alt);border:0.5px solid var(--divider);border-radius:var(--r-sm);padding:10px 12px;}
 .fmk-lbl{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);}
 .fmk-val{font-size:16px;font-weight:700;color:var(--title);margin-top:4px;}
@@ -169,7 +183,8 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
 .tbl tbody tr:hover td{background:#F3E4DA;}
 .tbl tfoot td{padding:12px 16px;border-top:2px solid var(--divider);font-weight:700;color:var(--title);text-align:right;background:var(--surface-alt);position:sticky;bottom:0;}
 .tbl tfoot td:first-child{text-align:left;}
-#cruzamento-sec .tbl th:nth-child(2),#cruzamento-sec .tbl td:nth-child(2){text-align:left;}
+#tblCriaTable th:nth-child(1),#tblCriaTable td:nth-child(1),#tblCriaTable th:last-child,#tblCriaTable td:last-child{text-align:center;}
+#tblCriaTable th:nth-child(2),#tblCriaTable td:nth-child(2){text-align:left;}
 .empty-state{padding:44px;text-align:center;color:var(--text-muted);font-size:13px;}
 ::-webkit-scrollbar{width:6px;height:7px;}
 ::-webkit-scrollbar-track{background:var(--surface);}
@@ -208,6 +223,7 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
     <a href="#pesquisa-sec">Pesquisa</a>
     <a href="#chart-sec">Evolução diária</a>
     <a href="#funnel-sec">Funil de captação</a>
+    <a href="#temperatura-sec">Temperatura</a>
     <a href="#daily-table-sec">Tabela diária</a>
     <a href="#cruzamento-sec">Cruzamento</a>
   </div>
@@ -322,6 +338,7 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
           <div class="fmk"><div class="fmk-lbl">CPL Meta</div><div class="fmk-val" id="mCPL">—</div></div>
           <div class="fmk"><div class="fmk-lbl">CTR</div><div class="fmk-val" id="mCTR">—</div></div>
           <div class="fmk"><div class="fmk-lbl">Connect rate</div><div class="fmk-val" id="mConn">—</div></div>
+          <div class="fmk" style="grid-column:1/-1;"><div class="fmk-lbl">Tx conversão (visualização de página → lead)</div><div class="fmk-val" id="mConvLead">—</div></div>
         </div>
         <div class="fbars" id="metaFunnelBars"></div>
       </div>
@@ -338,6 +355,29 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
         </div>
         <div class="fbars" id="googleFunnelBars"></div>
         <div class="funnel-empty-note">Fonte ainda não conectada · em breve</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEMPERATURA -->
+  <div class="section" id="temperatura-sec">
+    <div class="section-head"><h2 class="section-title">Métricas por <em>temperatura</em></h2><span class="section-tag">Campanha contém “quente” ou “frio”</span></div>
+    <div class="funnel-grid-2">
+      <div class="funnel-card temp-quente">
+        <div class="funnel-card-head"><span class="temp-dot temp-dot-quente"></span><span class="funnel-plat-title">Públicos quentes</span></div>
+        <div class="funnel-mini-kpis three">
+          <div class="fmk"><div class="fmk-lbl">Investimento</div><div class="fmk-val" id="tQuenteInvest">—</div></div>
+          <div class="fmk"><div class="fmk-lbl">CPL</div><div class="fmk-val" id="tQuenteCPL">—</div></div>
+          <div class="fmk"><div class="fmk-lbl">Leads</div><div class="fmk-val" id="tQuenteLeads">—</div></div>
+        </div>
+      </div>
+      <div class="funnel-card temp-frio">
+        <div class="funnel-card-head"><span class="temp-dot temp-dot-frio"></span><span class="funnel-plat-title">Públicos frios</span></div>
+        <div class="funnel-mini-kpis three">
+          <div class="fmk"><div class="fmk-lbl">Investimento</div><div class="fmk-val" id="tFrioInvest">—</div></div>
+          <div class="fmk"><div class="fmk-lbl">CPL</div><div class="fmk-val" id="tFrioCPL">—</div></div>
+          <div class="fmk"><div class="fmk-lbl">Leads</div><div class="fmk-val" id="tFrioLeads">—</div></div>
+        </div>
       </div>
     </div>
   </div>
@@ -367,18 +407,19 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
     </div>
   </div>
 
-  <!-- CRUZAMENTO CAMPANHA/PÚBLICO -->
+  <!-- CRUZAMENTO: 3 TABELAS SEPARADAS (campanha / público / criativo) -->
   <div class="section" id="cruzamento-sec">
-    <div class="section-head"><h2 class="section-title">Cruzamento <em>campanha × público</em></h2><span class="section-tag">Meta (campaign name / ad set name) × CRM (campanha / público) · clique no cabeçalho para ordenar</span></div>
-    <div class="tbl-card" id="tblCruzCard" data-fs-card>
-      <button class="fs-btn" id="tblCruzFsBtn" title="Tela cheia" aria-label="Tela cheia">
+    <div class="section-head"><h2 class="section-title">Cruzamento <em>meta × crm</em></h2><span class="section-tag">Clique no cabeçalho para ordenar</span></div>
+
+    <div class="subsection-lbl">Por campanha</div>
+    <div class="tbl-card" id="tblCampCard" data-fs-card>
+      <button class="fs-btn" id="tblCampFsBtn" title="Tela cheia" aria-label="Tela cheia">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
       </button>
       <div class="tbl-scroll">
-        <table class="tbl">
+        <table class="tbl" id="tblCampTable">
           <thead><tr>
-            <th data-sort="campanha">Campanha <span class="sort-caret"></span></th>
-            <th data-sort="publico">Público <span class="sort-caret"></span></th>
+            <th data-sort="nome">Campanha <span class="sort-caret"></span></th>
             <th data-sort="invest">Investimento <span class="sort-caret"></span></th>
             <th data-sort="impr">Impressões <span class="sort-caret"></span></th>
             <th data-sort="clicks">Cliques <span class="sort-caret"></span></th>
@@ -386,8 +427,54 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
             <th data-sort="leads">Leads <span class="sort-caret"></span></th>
             <th data-sort="cpl">CPL <span class="sort-caret"></span></th>
           </tr></thead>
-          <tbody id="tblCruz"></tbody>
-          <tfoot id="tblCruzFoot"></tfoot>
+          <tbody id="tblCamp"></tbody>
+          <tfoot id="tblCampFoot"></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="subsection-lbl">Por público</div>
+    <div class="tbl-card" id="tblPubCard" data-fs-card>
+      <button class="fs-btn" id="tblPubFsBtn" title="Tela cheia" aria-label="Tela cheia">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+      </button>
+      <div class="tbl-scroll">
+        <table class="tbl" id="tblPubTable">
+          <thead><tr>
+            <th data-sort="nome">Público <span class="sort-caret"></span></th>
+            <th data-sort="invest">Investimento <span class="sort-caret"></span></th>
+            <th data-sort="impr">Impressões <span class="sort-caret"></span></th>
+            <th data-sort="clicks">Cliques <span class="sort-caret"></span></th>
+            <th data-sort="ctr">CTR <span class="sort-caret"></span></th>
+            <th data-sort="leads">Leads <span class="sort-caret"></span></th>
+            <th data-sort="cpl">CPL <span class="sort-caret"></span></th>
+          </tr></thead>
+          <tbody id="tblPub"></tbody>
+          <tfoot id="tblPubFoot"></tfoot>
+        </table>
+      </div>
+    </div>
+
+    <div class="subsection-lbl">Por criativo</div>
+    <div class="tbl-card" id="tblCriaCard" data-fs-card>
+      <button class="fs-btn" id="tblCriaFsBtn" title="Tela cheia" aria-label="Tela cheia">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+      </button>
+      <div class="tbl-scroll">
+        <table class="tbl" id="tblCriaTable">
+          <thead><tr>
+            <th>Prévia</th>
+            <th data-sort="nome">Criativo <span class="sort-caret"></span></th>
+            <th data-sort="invest">Investimento <span class="sort-caret"></span></th>
+            <th data-sort="impr">Impressões <span class="sort-caret"></span></th>
+            <th data-sort="clicks">Cliques <span class="sort-caret"></span></th>
+            <th data-sort="ctr">CTR <span class="sort-caret"></span></th>
+            <th data-sort="leads">Leads <span class="sort-caret"></span></th>
+            <th data-sort="cpl">CPL <span class="sort-caret"></span></th>
+            <th>Link</th>
+          </tr></thead>
+          <tbody id="tblCria"></tbody>
+          <tfoot id="tblCriaFoot"></tfoot>
         </table>
       </div>
     </div>
@@ -534,6 +621,8 @@ function isoFromCrmData(s){
 }
 function isCapturaCampaign(name){ return normText(name).includes('cap'); }
 function isPaidMedium(medium){ return normText(medium).includes('paid'); }
+function isQuenteCampaign(name){ return normText(name).includes('quente'); }
+function isFrioCampaign(name){ return normText(name).includes('frio'); }
 function setText(id,v){ const e=document.getElementById(id); if(e) e.textContent=v; }
 function toISO(d){ return d.toISOString().slice(0,10); }
 function offsetDay(d,n){ const c=new Date(d); c.setDate(c.getDate()+n); return c; }
@@ -566,6 +655,8 @@ function detectColumns(){
   COLS.crmCriativo= colFind(ch,[/criativo/]);
   COLS.crmMedium  = colFind(ch,[/medium/]);
   COLS.grupoTotal = colFind(gh,[/^total$/]);
+  COLS.metaThumb    = colFind(mh,[/thumbnail/,/image.?url/,/\bthumb\b/]);
+  COLS.metaPermalink= colFind(mh,[/instagram.?permalink/,/permalink/]);
   console.log('%c[a comunidade] Colunas detectadas:','color:#12B60F;font-weight:bold',COLS);
   console.log('[a comunidade] Cabeçalhos meta:',mh);
   console.log('[a comunidade] Cabeçalhos crm:',ch);
@@ -740,6 +831,7 @@ function render(){
   setText('mCPL','R$ '+fmtM(cplPago));
   setText('mCTR',fmtP(ctr));
   setText('mConn',fmtP(connectRate));
+  setText('mConvLead',fmtP(convRate));
   renderFunnelBars('metaFunnelBars',[
     {lbl:'Impressões',n:impr,color:'#8A604D'},
     {lbl:'Cliques no link',n:clicks,color:'#C49C84'},
@@ -752,9 +844,22 @@ function render(){
     {lbl:'Leads',n:0,color:'#D9B9A9'}
   ],true);
 
+  // Temperatura — classifica pelo nome da campanha (contém "quente" ou "frio")
+  let tqInvest=0, tqLeads=0, tfInvest=0, tfLeads=0;
+  meta.forEach(r=>{ const sp=toNum(r[COLS.metaSpend]); if(isQuenteCampaign(r[COLS.metaCamp])) tqInvest+=sp; else if(isFrioCampaign(r[COLS.metaCamp])) tfInvest+=sp; });
+  crm.forEach(r=>{ if(isQuenteCampaign(r[COLS.crmCamp])) tqLeads++; else if(isFrioCampaign(r[COLS.crmCamp])) tfLeads++; });
+  setText('tQuenteInvest','R$ '+fmtM(tqInvest));
+  setText('tQuenteCPL','R$ '+fmtM(tqLeads>0?tqInvest/tqLeads:0));
+  setText('tQuenteLeads',fmtN(tqLeads));
+  setText('tFrioInvest','R$ '+fmtM(tfInvest));
+  setText('tFrioCPL','R$ '+fmtM(tfLeads>0?tfInvest/tfLeads:0));
+  setText('tFrioLeads',fmtN(tfLeads));
+
   renderChart(meta,crm);
   renderDailyTable(meta,crm,investCap,leadsPagos);
-  renderCruzTable(meta,crm);
+  renderCampTable(meta,crm);
+  renderPubTable(meta,crm);
+  renderCriaTable(meta,crm);
 
   console.log('%c[a comunidade] RENDER ('+f.from+' → '+f.to+')','color:#12B60F;font-weight:bold');
   console.log('  Investimento total: R$ '+fmtM(investTotal)+' (captura R$ '+fmtM(investCap)+' + rmkt R$ '+fmtM(investRmkt)+')');
@@ -854,59 +959,90 @@ function updateSortCarets(){
   });
 }
 
-// ═══ CRUZAMENTO: campanha × Campaign Name, público × Ad Set Name ═══
-// Junta a Meta (investimento/impressões/cliques por Campaign Name + Ad Set Name) com o
-// CRM (contagem de leads por campanha + público) usando os mesmos nomes como chave.
-let CRUZ_ROWS=[], CRUZ_TOTALS=null;
-let SORT2={key:'invest',dir:'desc'};
-function cruzKey(camp,pub){ return normText(camp)+'||'+normText(pub); }
-function buildCruzamento(meta,crm){
+// ═══ CRUZAMENTO: 3 tabelas — campanha × Campaign Name, público × Ad Set Name, criativo × Ad Name ═══
+// Cada tabela junta a Meta (investimento/impressões/cliques) com o CRM (contagem de leads)
+// pelo mesmo nome (campanha, público ou criativo) como chave.
+const escAttr=s=>String(s??'').replace(/"/g,'&quot;');
+const IG_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"/></svg>';
+window.dotbImgFail=function(el){ const s=document.createElement('span'); s.className='cr-noimg'; s.textContent='—'; el.replaceWith(s); };
+let CAMP_ROWS=[], CAMP_TOTALS=null, SORT_CAMP={key:'invest',dir:'desc'};
+let PUB_ROWS=[], PUB_TOTALS=null, SORT_PUB={key:'invest',dir:'desc'};
+let CRIA_ROWS=[], CRIA_TOTALS=null, SORT_CRIA={key:'invest',dir:'desc'};
+function buildGroup(meta,crm,metaCol,crmCol,withMedia){
   const byKey={};
   meta.forEach(r=>{
-    const campanha=(r[COLS.metaCamp]||'').trim(), publico=(r[COLS.metaAdset]||'').trim();
-    if(!campanha && !publico) return;
-    const k=cruzKey(campanha,publico);
-    const b=byKey[k]=byKey[k]||{campanha:campanha||'(sem campanha)',publico:publico||'(sem público)',invest:0,impr:0,clicks:0,leads:0};
+    const nome=(r[metaCol]||'').trim(); if(!nome) return;
+    const k=normText(nome);
+    const b=byKey[k]=byKey[k]||{nome,invest:0,impr:0,clicks:0,leads:0,thumb:'',permalink:''};
     b.invest+=toNum(r[COLS.metaSpend]); b.impr+=toNum(r[COLS.metaImpr]); b.clicks+=toNum(r[COLS.metaClicks]);
+    if(withMedia){
+      if(!b.thumb){ const th=String(r[COLS.metaThumb]||'').trim(); if(th) b.thumb=th; }
+      if(!b.permalink){ const pl=String(r[COLS.metaPermalink]||'').trim(); if(pl) b.permalink=pl; }
+    }
   });
   crm.forEach(r=>{
-    const campanha=(r[COLS.crmCamp]||'').trim(), publico=(r[COLS.crmPublico]||'').trim();
-    if(!campanha && !publico) return;
-    const k=cruzKey(campanha,publico);
-    const b=byKey[k]=byKey[k]||{campanha:campanha||'(sem campanha)',publico:publico||'(sem público)',invest:0,impr:0,clicks:0,leads:0};
+    const nome=(r[crmCol]||'').trim(); if(!nome) return;
+    const k=normText(nome);
+    const b=byKey[k]=byKey[k]||{nome,invest:0,impr:0,clicks:0,leads:0,thumb:'',permalink:''};
     b.leads+=1;
   });
   return Object.values(byKey).map(b=>({...b,ctr:b.impr>0?b.clicks/b.impr:0,cpl:b.leads>0?b.invest/b.leads:0}));
 }
-function renderCruzTable(meta,crm){
-  CRUZ_ROWS=buildCruzamento(meta,crm);
+function computeGroupTotals(rows){
   let tI=0,tImp=0,tC=0,tL=0;
-  CRUZ_ROWS.forEach(r=>{ tI+=r.invest; tImp+=r.impr; tC+=r.clicks; tL+=r.leads; });
-  CRUZ_TOTALS={invest:tI,impr:tImp,clicks:tC,ctr:tImp>0?tC/tImp:0,leads:tL,cpl:tL>0?tI/tL:0};
-  paintCruzTable();
+  rows.forEach(r=>{ tI+=r.invest; tImp+=r.impr; tC+=r.clicks; tL+=r.leads; });
+  return {invest:tI,impr:tImp,clicks:tC,ctr:tImp>0?tC/tImp:0,leads:tL,cpl:tL>0?tI/tL:0};
 }
-function paintCruzTable(){
-  const body=document.getElementById('tblCruz'); const foot=document.getElementById('tblCruzFoot');
-  if(!body) return;
-  if(!CRUZ_ROWS.length){ body.innerHTML='<tr><td colspan="8" class="empty-state">Nenhum dado no período selecionado</td></tr>'; foot.innerHTML=''; updateCruzSortCarets(); return; }
-  const {key,dir}=SORT2, mul=dir==='asc'?1:-1;
-  const sorted=[...CRUZ_ROWS].sort((a,b)=>{
-    if(key==='campanha'||key==='publico') return mul*String(a[key]).localeCompare(String(b[key]),'pt-BR');
+function sortGroupRows(rows,sort){
+  const {key,dir}=sort, mul=dir==='asc'?1:-1;
+  return [...rows].sort((a,b)=>{
+    if(key==='nome') return mul*String(a.nome).localeCompare(String(b.nome),'pt-BR');
     return mul*((a[key]||0)-(b[key]||0));
   });
-  body.innerHTML=sorted.map(r=>(
-    '<tr><td>'+r.campanha+'</td><td style="text-align:left;color:var(--text-muted);">'+r.publico+'</td><td>R$ '+fmtM(r.invest)+'</td><td>'+fmtN(r.impr)+'</td><td>'+fmtN(r.clicks)+'</td><td>'+fmtP(r.ctr)+'</td><td>'+fmtN(r.leads)+'</td><td>R$ '+fmtM(r.cpl)+'</td></tr>'
-  )).join('');
-  const t=CRUZ_TOTALS;
-  foot.innerHTML='<tr><td>Total</td><td></td><td>R$ '+fmtM(t.invest)+'</td><td>'+fmtN(t.impr)+'</td><td>'+fmtN(t.clicks)+'</td><td>'+fmtP(t.ctr)+'</td><td>'+fmtN(t.leads)+'</td><td>R$ '+fmtM(t.cpl)+'</td></tr>';
-  updateCruzSortCarets();
 }
-function updateCruzSortCarets(){
-  document.querySelectorAll('#cruzamento-sec th[data-sort]').forEach(th=>{
-    const active=th.dataset.sort===SORT2.key;
+function updateSortCaretsFor(tableId,sort){
+  document.querySelectorAll('#'+tableId+' th[data-sort]').forEach(th=>{
+    const active=th.dataset.sort===sort.key;
     th.classList.toggle('sort-active',active);
-    const car=th.querySelector('.sort-caret'); if(car) car.textContent=active?(SORT2.dir==='asc'?'▲':'▼'):'';
+    const car=th.querySelector('.sort-caret'); if(car) car.textContent=active?(sort.dir==='asc'?'▲':'▼'):'';
   });
+}
+function renderCampTable(meta,crm){ CAMP_ROWS=buildGroup(meta,crm,COLS.metaCamp,COLS.crmCamp,false); CAMP_TOTALS=computeGroupTotals(CAMP_ROWS); paintCampTable(); }
+function paintCampTable(){
+  const body=document.getElementById('tblCamp'), foot=document.getElementById('tblCampFoot');
+  if(!body) return;
+  if(!CAMP_ROWS.length){ body.innerHTML='<tr><td colspan="7" class="empty-state">Nenhum dado no período selecionado</td></tr>'; foot.innerHTML=''; updateSortCaretsFor('tblCampTable',SORT_CAMP); return; }
+  const sorted=sortGroupRows(CAMP_ROWS,SORT_CAMP);
+  body.innerHTML=sorted.map(r=>'<tr><td>'+r.nome+'</td><td>R$ '+fmtM(r.invest)+'</td><td>'+fmtN(r.impr)+'</td><td>'+fmtN(r.clicks)+'</td><td>'+fmtP(r.ctr)+'</td><td>'+fmtN(r.leads)+'</td><td>R$ '+fmtM(r.cpl)+'</td></tr>').join('');
+  const t=CAMP_TOTALS;
+  foot.innerHTML='<tr><td>Total</td><td>R$ '+fmtM(t.invest)+'</td><td>'+fmtN(t.impr)+'</td><td>'+fmtN(t.clicks)+'</td><td>'+fmtP(t.ctr)+'</td><td>'+fmtN(t.leads)+'</td><td>R$ '+fmtM(t.cpl)+'</td></tr>';
+  updateSortCaretsFor('tblCampTable',SORT_CAMP);
+}
+function renderPubTable(meta,crm){ PUB_ROWS=buildGroup(meta,crm,COLS.metaAdset,COLS.crmPublico,false); PUB_TOTALS=computeGroupTotals(PUB_ROWS); paintPubTable(); }
+function paintPubTable(){
+  const body=document.getElementById('tblPub'), foot=document.getElementById('tblPubFoot');
+  if(!body) return;
+  if(!PUB_ROWS.length){ body.innerHTML='<tr><td colspan="7" class="empty-state">Nenhum dado no período selecionado</td></tr>'; foot.innerHTML=''; updateSortCaretsFor('tblPubTable',SORT_PUB); return; }
+  const sorted=sortGroupRows(PUB_ROWS,SORT_PUB);
+  body.innerHTML=sorted.map(r=>'<tr><td>'+r.nome+'</td><td>R$ '+fmtM(r.invest)+'</td><td>'+fmtN(r.impr)+'</td><td>'+fmtN(r.clicks)+'</td><td>'+fmtP(r.ctr)+'</td><td>'+fmtN(r.leads)+'</td><td>R$ '+fmtM(r.cpl)+'</td></tr>').join('');
+  const t=PUB_TOTALS;
+  foot.innerHTML='<tr><td>Total</td><td>R$ '+fmtM(t.invest)+'</td><td>'+fmtN(t.impr)+'</td><td>'+fmtN(t.clicks)+'</td><td>'+fmtP(t.ctr)+'</td><td>'+fmtN(t.leads)+'</td><td>R$ '+fmtM(t.cpl)+'</td></tr>';
+  updateSortCaretsFor('tblPubTable',SORT_PUB);
+}
+function renderCriaTable(meta,crm){ CRIA_ROWS=buildGroup(meta,crm,COLS.metaAd,COLS.crmCriativo,true); CRIA_TOTALS=computeGroupTotals(CRIA_ROWS); paintCriaTable(); }
+function paintCriaTable(){
+  const body=document.getElementById('tblCria'), foot=document.getElementById('tblCriaFoot');
+  if(!body) return;
+  if(!CRIA_ROWS.length){ body.innerHTML='<tr><td colspan="9" class="empty-state">Nenhum dado no período selecionado</td></tr>'; foot.innerHTML=''; updateSortCaretsFor('tblCriaTable',SORT_CRIA); return; }
+  const sorted=sortGroupRows(CRIA_ROWS,SORT_CRIA);
+  body.innerHTML=sorted.map(r=>{
+    const thumbCell=r.thumb?'<img class="cr-thumb" src="'+escAttr(r.thumb)+'" loading="lazy" referrerpolicy="no-referrer" alt="" onerror="dotbImgFail(this)">':'<span class="cr-noimg">—</span>';
+    const linkCell=r.permalink?'<a class="ig-link" href="'+escAttr(r.permalink)+'" target="_blank" rel="noopener" title="Abrir criativo">'+IG_SVG+'</a>':'<span style="color:var(--text-muted)">—</span>';
+    return '<tr><td class="cr-thumb-cell">'+thumbCell+'</td><td>'+r.nome+'</td><td>R$ '+fmtM(r.invest)+'</td><td>'+fmtN(r.impr)+'</td><td>'+fmtN(r.clicks)+'</td><td>'+fmtP(r.ctr)+'</td><td>'+fmtN(r.leads)+'</td><td>R$ '+fmtM(r.cpl)+'</td><td>'+linkCell+'</td></tr>';
+  }).join('');
+  const t=CRIA_TOTALS;
+  foot.innerHTML='<tr><td></td><td>Total</td><td>R$ '+fmtM(t.invest)+'</td><td>'+fmtN(t.impr)+'</td><td>'+fmtN(t.clicks)+'</td><td>'+fmtP(t.ctr)+'</td><td>'+fmtN(t.leads)+'</td><td>R$ '+fmtM(t.cpl)+'</td><td></td></tr>';
+  updateSortCaretsFor('tblCriaTable',SORT_CRIA);
 }
 
 // ═══ FULLSCREEN TOGGLES ═══
@@ -959,18 +1095,25 @@ function initEvents(){
       paintDailyTable();
     });
   });
-  document.querySelectorAll('#cruzamento-sec th[data-sort]').forEach(th=>{
-    th.addEventListener('click',()=>{
-      const key=th.dataset.sort;
-      if(SORT2.key===key) SORT2.dir=SORT2.dir==='asc'?'desc':'asc';
-      else { SORT2.key=key; SORT2.dir=(key==='campanha'||key==='publico')?'asc':'desc'; }
-      paintCruzTable();
-    });
-  });
+  initSortable('tblCampTable',SORT_CAMP,paintCampTable);
+  initSortable('tblPubTable',SORT_PUB,paintPubTable);
+  initSortable('tblCriaTable',SORT_CRIA,paintCriaTable);
   initFullscreen('chartFsBtn','chartCard');
   initFullscreen('tblFsBtn','tblCard');
-  initFullscreen('tblCruzFsBtn','tblCruzCard');
+  initFullscreen('tblCampFsBtn','tblCampCard');
+  initFullscreen('tblPubFsBtn','tblPubCard');
+  initFullscreen('tblCriaFsBtn','tblCriaCard');
   initSubnav();
+}
+function initSortable(tableId,sortState,repaint){
+  document.querySelectorAll('#'+tableId+' th[data-sort]').forEach(th=>{
+    th.addEventListener('click',()=>{
+      const key=th.dataset.sort;
+      if(sortState.key===key) sortState.dir=sortState.dir==='asc'?'desc':'asc';
+      else { sortState.key=key; sortState.dir=key==='nome'?'asc':'desc'; }
+      repaint();
+    });
+  });
 }
 document.addEventListener('DOMContentLoaded',async()=>{
   initDatePicker();
