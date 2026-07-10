@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -147,11 +146,11 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
 .fmk-lbl{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted);}
 .fmk-val{font-size:16px;font-weight:700;color:var(--title);margin-top:4px;}
 .fbars{display:flex;flex-direction:column;gap:0;}
-.fbar-row{display:flex;align-items:center;gap:10px;}
-.fbar-track{flex:1;background:var(--surface-alt);border:0.5px solid var(--divider);border-radius:var(--r-sm);overflow:hidden;height:40px;position:relative;}
-.fbar-fill{height:100%;display:flex;align-items:center;padding:0 12px;color:#fff;font-size:12px;font-weight:500;border-radius:var(--r-sm);transition:width .5s ease;white-space:nowrap;}
-.fbar-num{font-size:14px;font-weight:700;margin-left:auto;padding-right:2px;}
-.fbar-lbl-side{width:96px;flex-shrink:0;font-size:10px;color:var(--text-muted);text-align:right;}
+.fbar-row{display:grid;grid-template-columns:112px 1fr 92px;gap:10px;align-items:center;}
+.fbar-track{background:var(--surface-alt);border:0.5px solid var(--divider);border-radius:var(--r-sm);overflow:hidden;height:34px;position:relative;}
+.fbar-fill{height:100%;border-radius:var(--r-sm);transition:width .5s ease;min-width:6px;}
+.fbar-num{font-size:14px;font-weight:700;color:var(--title);text-align:right;font-variant-numeric:tabular-nums;}
+.fbar-lbl-side{flex-shrink:0;font-size:10.5px;color:var(--text-muted);text-align:right;font-weight:500;}
 .fbar-rate{display:flex;justify-content:center;padding:5px 0;font-size:10.5px;color:var(--text-muted);gap:6px;align-items:center;}
 .fbar-rate svg{width:12px;height:12px;color:var(--accent-dark);}
 .funnel-empty-note{font-size:11.5px;color:var(--text-muted);background:var(--surface-alt);border:1px dashed var(--divider);border-radius:var(--r-sm);padding:10px 12px;margin-top:6px;text-align:center;}
@@ -170,6 +169,7 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
 .tbl tbody tr:hover td{background:#F3E4DA;}
 .tbl tfoot td{padding:12px 16px;border-top:2px solid var(--divider);font-weight:700;color:var(--title);text-align:right;background:var(--surface-alt);position:sticky;bottom:0;}
 .tbl tfoot td:first-child{text-align:left;}
+#cruzamento-sec .tbl th:nth-child(2),#cruzamento-sec .tbl td:nth-child(2){text-align:left;}
 .empty-state{padding:44px;text-align:center;color:var(--text-muted);font-size:13px;}
 ::-webkit-scrollbar{width:6px;height:7px;}
 ::-webkit-scrollbar-track{background:var(--surface);}
@@ -209,6 +209,7 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
     <a href="#chart-sec">Evolução diária</a>
     <a href="#funnel-sec">Funil de captação</a>
     <a href="#daily-table-sec">Tabela diária</a>
+    <a href="#cruzamento-sec">Cruzamento</a>
   </div>
 </nav>
 <div class="wrap">
@@ -365,6 +366,32 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
       </div>
     </div>
   </div>
+
+  <!-- CRUZAMENTO CAMPANHA/PÚBLICO -->
+  <div class="section" id="cruzamento-sec">
+    <div class="section-head"><h2 class="section-title">Cruzamento <em>campanha × público</em></h2><span class="section-tag">Meta (campaign name / ad set name) × CRM (campanha / público) · clique no cabeçalho para ordenar</span></div>
+    <div class="tbl-card" id="tblCruzCard" data-fs-card>
+      <button class="fs-btn" id="tblCruzFsBtn" title="Tela cheia" aria-label="Tela cheia">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+      </button>
+      <div class="tbl-scroll">
+        <table class="tbl">
+          <thead><tr>
+            <th data-sort="campanha">Campanha <span class="sort-caret"></span></th>
+            <th data-sort="publico">Público <span class="sort-caret"></span></th>
+            <th data-sort="invest">Investimento <span class="sort-caret"></span></th>
+            <th data-sort="impr">Impressões <span class="sort-caret"></span></th>
+            <th data-sort="clicks">Cliques <span class="sort-caret"></span></th>
+            <th data-sort="ctr">CTR <span class="sort-caret"></span></th>
+            <th data-sort="leads">Leads <span class="sort-caret"></span></th>
+            <th data-sort="cpl">CPL <span class="sort-caret"></span></th>
+          </tr></thead>
+          <tbody id="tblCruz"></tbody>
+          <tfoot id="tblCruzFoot"></tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
@@ -483,7 +510,28 @@ function toNum(s){
 }
 function normText(s){ const str=String(s||'').toLowerCase(); return str.normalize?str.normalize('NFD').replace(/[̀-ͯ]/g,''):str; }
 function isoFromMetaDay(s){ const m=String(s||'').trim().match(/^(\d{4})-(\d{2})-(\d{2})/); return m?m[0].slice(0,10):null; }
-function isoFromCrmData(s){ const str=String(s||'').trim(); const m=str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); if(!m) return null; return m[3]+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0'); }
+// A aba crm mistura datas em formato BR (DD/MM/AAAA) com algumas linhas em MM/DD/AAAA
+// (provavelmente inseridas por uma automação com locale diferente). Quando os dois
+// primeiros números são ambíguos (ambos ≤12), escolhe a interpretação mais próxima
+// de hoje para manter um único padrão de data em todo o dashboard.
+function daysDiffFromToday(iso){
+  const d=asLocalDate(iso); if(!d) return Infinity;
+  const t=new Date(); t.setHours(0,0,0,0);
+  return Math.abs(Math.round((d-t)/86400000));
+}
+function isoFromCrmData(s){
+  const str=String(s||'').trim();
+  const m=str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(!m) return null;
+  const p1=parseInt(m[1],10), p2=parseInt(m[2],10), year=m[3];
+  const cands=[];
+  if(p2>=1&&p2<=12&&p1>=1&&p1<=31) cands.push(year+'-'+String(p2).padStart(2,'0')+'-'+String(p1).padStart(2,'0')); // DD/MM (padrão BR)
+  if(p1!==p2 && p1>=1&&p1<=12&&p2>=1&&p2<=31) cands.push(year+'-'+String(p1).padStart(2,'0')+'-'+String(p2).padStart(2,'0')); // MM/DD (fallback)
+  if(!cands.length) return null;
+  if(cands.length===1) return cands[0];
+  const diffs=cands.map(daysDiffFromToday);
+  return diffs[0]<=diffs[1] ? cands[0] : cands[1];
+}
 function isCapturaCampaign(name){ return normText(name).includes('cap'); }
 function isPaidMedium(medium){ return normText(medium).includes('paid'); }
 function setText(id,v){ const e=document.getElementById(id); if(e) e.textContent=v; }
@@ -706,6 +754,7 @@ function render(){
 
   renderChart(meta,crm);
   renderDailyTable(meta,crm,investCap,leadsPagos);
+  renderCruzTable(meta,crm);
 
   console.log('%c[a comunidade] RENDER ('+f.from+' → '+f.to+')','color:#12B60F;font-weight:bold');
   console.log('  Investimento total: R$ '+fmtM(investTotal)+' (captura R$ '+fmtM(investCap)+' + rmkt R$ '+fmtM(investRmkt)+')');
@@ -717,9 +766,9 @@ function renderFunnelBars(containerId,stages,empty){
   const wrap=document.getElementById(containerId);
   const max=Math.max(1,...stages.map(s=>s.n));
   wrap.innerHTML=stages.map((s,i)=>{
-    const w=empty?100:Math.max(14,Math.round((s.n/max)*100));
+    const w=empty?100:Math.max(4,Math.round((s.n/max)*100));
     const rateHtml = i>0 && !empty ? '<div class="fbar-rate"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v15M12 19l-4-4M12 19l4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'+(stages[0].n>0?fmtP(s.n/stages[0].n):'—')+' do topo</div>' : '';
-    return (i>0?rateHtml:'')+'<div class="fbar-row"><div class="fbar-lbl-side">'+s.lbl+'</div><div class="fbar-track"><div class="fbar-fill" style="width:'+w+'%;background:'+(empty?'var(--divider)':s.color)+';">'+s.lbl+'<span class="fbar-num">'+(empty?'—':fmtN(s.n))+'</span></div></div></div>';
+    return (i>0?rateHtml:'')+'<div class="fbar-row"><div class="fbar-lbl-side">'+s.lbl+'</div><div class="fbar-track"><div class="fbar-fill" style="width:'+w+'%;background:'+(empty?'var(--divider)':s.color)+';"></div></div><div class="fbar-num">'+(empty?'—':fmtN(s.n))+'</div></div>';
   }).join('');
 }
 
@@ -805,6 +854,61 @@ function updateSortCarets(){
   });
 }
 
+// ═══ CRUZAMENTO: campanha × Campaign Name, público × Ad Set Name ═══
+// Junta a Meta (investimento/impressões/cliques por Campaign Name + Ad Set Name) com o
+// CRM (contagem de leads por campanha + público) usando os mesmos nomes como chave.
+let CRUZ_ROWS=[], CRUZ_TOTALS=null;
+let SORT2={key:'invest',dir:'desc'};
+function cruzKey(camp,pub){ return normText(camp)+'||'+normText(pub); }
+function buildCruzamento(meta,crm){
+  const byKey={};
+  meta.forEach(r=>{
+    const campanha=(r[COLS.metaCamp]||'').trim(), publico=(r[COLS.metaAdset]||'').trim();
+    if(!campanha && !publico) return;
+    const k=cruzKey(campanha,publico);
+    const b=byKey[k]=byKey[k]||{campanha:campanha||'(sem campanha)',publico:publico||'(sem público)',invest:0,impr:0,clicks:0,leads:0};
+    b.invest+=toNum(r[COLS.metaSpend]); b.impr+=toNum(r[COLS.metaImpr]); b.clicks+=toNum(r[COLS.metaClicks]);
+  });
+  crm.forEach(r=>{
+    const campanha=(r[COLS.crmCamp]||'').trim(), publico=(r[COLS.crmPublico]||'').trim();
+    if(!campanha && !publico) return;
+    const k=cruzKey(campanha,publico);
+    const b=byKey[k]=byKey[k]||{campanha:campanha||'(sem campanha)',publico:publico||'(sem público)',invest:0,impr:0,clicks:0,leads:0};
+    b.leads+=1;
+  });
+  return Object.values(byKey).map(b=>({...b,ctr:b.impr>0?b.clicks/b.impr:0,cpl:b.leads>0?b.invest/b.leads:0}));
+}
+function renderCruzTable(meta,crm){
+  CRUZ_ROWS=buildCruzamento(meta,crm);
+  let tI=0,tImp=0,tC=0,tL=0;
+  CRUZ_ROWS.forEach(r=>{ tI+=r.invest; tImp+=r.impr; tC+=r.clicks; tL+=r.leads; });
+  CRUZ_TOTALS={invest:tI,impr:tImp,clicks:tC,ctr:tImp>0?tC/tImp:0,leads:tL,cpl:tL>0?tI/tL:0};
+  paintCruzTable();
+}
+function paintCruzTable(){
+  const body=document.getElementById('tblCruz'); const foot=document.getElementById('tblCruzFoot');
+  if(!body) return;
+  if(!CRUZ_ROWS.length){ body.innerHTML='<tr><td colspan="8" class="empty-state">Nenhum dado no período selecionado</td></tr>'; foot.innerHTML=''; updateCruzSortCarets(); return; }
+  const {key,dir}=SORT2, mul=dir==='asc'?1:-1;
+  const sorted=[...CRUZ_ROWS].sort((a,b)=>{
+    if(key==='campanha'||key==='publico') return mul*String(a[key]).localeCompare(String(b[key]),'pt-BR');
+    return mul*((a[key]||0)-(b[key]||0));
+  });
+  body.innerHTML=sorted.map(r=>(
+    '<tr><td>'+r.campanha+'</td><td style="text-align:left;color:var(--text-muted);">'+r.publico+'</td><td>R$ '+fmtM(r.invest)+'</td><td>'+fmtN(r.impr)+'</td><td>'+fmtN(r.clicks)+'</td><td>'+fmtP(r.ctr)+'</td><td>'+fmtN(r.leads)+'</td><td>R$ '+fmtM(r.cpl)+'</td></tr>'
+  )).join('');
+  const t=CRUZ_TOTALS;
+  foot.innerHTML='<tr><td>Total</td><td></td><td>R$ '+fmtM(t.invest)+'</td><td>'+fmtN(t.impr)+'</td><td>'+fmtN(t.clicks)+'</td><td>'+fmtP(t.ctr)+'</td><td>'+fmtN(t.leads)+'</td><td>R$ '+fmtM(t.cpl)+'</td></tr>';
+  updateCruzSortCarets();
+}
+function updateCruzSortCarets(){
+  document.querySelectorAll('#cruzamento-sec th[data-sort]').forEach(th=>{
+    const active=th.dataset.sort===SORT2.key;
+    th.classList.toggle('sort-active',active);
+    const car=th.querySelector('.sort-caret'); if(car) car.textContent=active?(SORT2.dir==='asc'?'▲':'▼'):'';
+  });
+}
+
 // ═══ FULLSCREEN TOGGLES ═══
 function initFullscreen(btnId,cardId){
   const btn=document.getElementById(btnId), card=document.getElementById(cardId);
@@ -855,8 +959,17 @@ function initEvents(){
       paintDailyTable();
     });
   });
+  document.querySelectorAll('#cruzamento-sec th[data-sort]').forEach(th=>{
+    th.addEventListener('click',()=>{
+      const key=th.dataset.sort;
+      if(SORT2.key===key) SORT2.dir=SORT2.dir==='asc'?'desc':'asc';
+      else { SORT2.key=key; SORT2.dir=(key==='campanha'||key==='publico')?'asc':'desc'; }
+      paintCruzTable();
+    });
+  });
   initFullscreen('chartFsBtn','chartCard');
   initFullscreen('tblFsBtn','tblCard');
+  initFullscreen('tblCruzFsBtn','tblCruzCard');
   initSubnav();
 }
 document.addEventListener('DOMContentLoaded',async()=>{
