@@ -168,6 +168,10 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
 .fbar-rate{display:flex;justify-content:center;padding:5px 0;font-size:10.5px;color:var(--text-muted);gap:6px;align-items:center;}
 .fbar-rate svg{width:12px;height:12px;color:var(--accent-dark);}
 .funnel-empty-note{font-size:11.5px;color:var(--text-muted);background:var(--surface-alt);border:1px dashed var(--divider);border-radius:var(--r-sm);padding:10px 12px;margin-top:6px;text-align:center;}
+.pie-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:20px;}
+.pie-card{padding:18px 18px 14px;}
+.pie-title{font-size:13px;font-weight:700;color:var(--title);margin-bottom:12px;}
+.pie-canvas-wrap{position:relative;width:100%;height:230px;}
 /* TABLE */
 .tbl-card{background:var(--surface);border:0.5px solid var(--divider);border-radius:var(--r-lg);box-shadow:var(--shadow);position:relative;overflow:hidden;}
 .tbl-scroll{overflow:auto;max-height:420px;}
@@ -221,6 +225,7 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
     <a href="#kpis" class="active">KPIs</a>
     <a href="#captacao-sec">Captação</a>
     <a href="#pesquisa-sec">Pesquisa</a>
+    <a href="#pesquisa-charts-sec">Respostas da pesquisa</a>
     <a href="#chart-sec">Evolução diária</a>
     <a href="#funnel-sec">Funil de captação</a>
     <a href="#temperatura-sec">Temperatura</a>
@@ -297,14 +302,26 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
     </div>
   </div>
 
-  <!-- PESQUISA (ZERADO) -->
+  <!-- PESQUISA -->
   <div class="section" id="pesquisa-sec">
-    <div class="section-head"><h2 class="section-title">Pesquisa de <em>boas-vindas</em></h2><span class="section-note">Fonte ainda não conectada · em breve</span></div>
+    <div class="section-head"><h2 class="section-title">Pesquisa de <em>boas-vindas</em></h2><span class="section-tag">Aba pesquisa</span></div>
     <div class="kpi-grid four">
-      <div class="kpi muted"><div class="kpi-lbl">Respondentes</div><div class="kpi-val">—</div><div class="kpi-sub">aguardando conexão</div></div>
-      <div class="kpi muted"><div class="kpi-lbl">% respondidas</div><div class="kpi-val">—</div><div class="kpi-sub">aguardando conexão</div></div>
-      <div class="kpi muted"><div class="kpi-lbl">Qtd. ativas 1h</div><div class="kpi-val">—</div><div class="kpi-sub">aguardando conexão</div></div>
-      <div class="kpi muted"><div class="kpi-lbl">% ativas 1h</div><div class="kpi-val">—</div><div class="kpi-sub">aguardando conexão</div></div>
+      <div class="kpi"><div class="kpi-lbl">Respondentes</div><div class="kpi-val" id="pRespondentes">—</div><div class="kpi-sub">total de respostas</div></div>
+      <div class="kpi"><div class="kpi-lbl">% respondidas</div><div class="kpi-val" id="pPctRespondidas">—</div><div class="kpi-sub">respondentes ÷ leads geral</div></div>
+      <div class="kpi"><div class="kpi-lbl">Renda acima de 1k</div><div class="kpi-val" id="pRendaAcima1k">—</div><div class="kpi-sub">rendimento mensal ≥ 1.000 €</div></div>
+      <div class="kpi"><div class="kpi-lbl">% acima de 1k</div><div class="kpi-val" id="pPctAcima1k">—</div><div class="kpi-sub">acima de 1k ÷ total de respostas</div></div>
+    </div>
+  </div>
+
+  <!-- PESQUISA · GRÁFICOS DE PIZZA -->
+  <div class="section" id="pesquisa-charts-sec">
+    <div class="section-head"><h2 class="section-title">Pesquisa <em>· respostas</em></h2><span class="section-tag">Distribuição por pergunta</span></div>
+    <div class="pie-grid">
+      <div class="chart-card pie-card"><h3 class="pie-title">Idade</h3><div class="pie-canvas-wrap"><canvas id="pieIdade"></canvas></div></div>
+      <div class="chart-card pie-card"><h3 class="pie-title">Formação acadêmica</h3><div class="pie-canvas-wrap"><canvas id="pieFormacao"></canvas></div></div>
+      <div class="chart-card pie-card"><h3 class="pie-title">Situação profissional</h3><div class="pie-canvas-wrap"><canvas id="pieProfissional"></canvas></div></div>
+      <div class="chart-card pie-card"><h3 class="pie-title">Rendimento mensal</h3><div class="pie-canvas-wrap"><canvas id="pieRenda"></canvas></div></div>
+      <div class="chart-card pie-card"><h3 class="pie-title">Investimento em saúde / bem-estar</h3><div class="pie-canvas-wrap"><canvas id="pieSaude"></canvas></div></div>
     </div>
   </div>
 
@@ -487,9 +504,10 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
 const URLS = {
   meta:   'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8G-glBbuXTjMwVdWWdY5dFd0jviPmpPIEC-nTyjlIipevft5Et_ieY0hJSacMiauoM9RQBWx08ZV0/pub?gid=0&single=true&output=csv',
   grupos: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8G-glBbuXTjMwVdWWdY5dFd0jviPmpPIEC-nTyjlIipevft5Et_ieY0hJSacMiauoM9RQBWx08ZV0/pub?gid=1999287374&single=true&output=csv',
-  crm:    'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8G-glBbuXTjMwVdWWdY5dFd0jviPmpPIEC-nTyjlIipevft5Et_ieY0hJSacMiauoM9RQBWx08ZV0/pub?gid=1820178885&single=true&output=csv'
+  crm:    'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8G-glBbuXTjMwVdWWdY5dFd0jviPmpPIEC-nTyjlIipevft5Et_ieY0hJSacMiauoM9RQBWx08ZV0/pub?gid=1820178885&single=true&output=csv',
+  pesquisa: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8G-glBbuXTjMwVdWWdY5dFd0jviPmpPIEC-nTyjlIipevft5Et_ieY0hJSacMiauoM9RQBWx08ZV0/pub?gid=745079856&single=true&output=csv'
 };
-let RAW={meta:[],grupos:[],crm:[]};
+let RAW={meta:[],grupos:[],crm:[],pesquisa:[]};
 let COLS={};
 let DATE_MIN='', DATE_MAX='';
 let DP={viewDate:null,draftFrom:'',draftTo:'',draftPreset:'all'};
@@ -657,6 +675,13 @@ function detectColumns(){
   COLS.grupoTotal = colFind(gh,[/^total$/]);
   COLS.metaThumb    = colFind(mh,[/thumbnail/,/image.?url/,/\bthumb\b/]);
   COLS.metaPermalink= colFind(mh,[/instagram.?permalink/,/permalink/]);
+  const qh=RAW.pesquisa[0]?Object.keys(RAW.pesquisa[0]):[];
+  COLS.pesqData        = colFind(qh,[/submitted.?at/,/^data$/,/^date$/]);
+  COLS.pesqIdade       = colFind(qh,[/idade/]);
+  COLS.pesqFormacao    = colFind(qh,[/forma[çc][aã]o/]);
+  COLS.pesqProfissional= colFind(qh,[/profissional/]);
+  COLS.pesqRenda       = colFind(qh,[/rendimento/]);
+  COLS.pesqSaude       = colFind(qh,[/sa[uú]de/,/bem.?estar/]);
   console.log('%c[a comunidade] Colunas detectadas:','color:#12B60F;font-weight:bold',COLS);
   console.log('[a comunidade] Cabeçalhos meta:',mh);
   console.log('[a comunidade] Cabeçalhos crm:',ch);
@@ -667,10 +692,11 @@ function detectColumns(){
 async function loadData(){
   setStatus('loading','Carregando dados…');
   try{
-    const [m,g,c]=await Promise.all([fetchCSV(URLS.meta),fetchCSV(URLS.grupos),fetchCSV(URLS.crm)]);
+    const [m,g,c,q]=await Promise.all([fetchCSV(URLS.meta),fetchCSV(URLS.grupos),fetchCSV(URLS.crm),fetchCSV(URLS.pesquisa)]);
     RAW.meta=cleanRows(csvToObjects(m),'Meta');
     RAW.grupos=cleanRows(csvToObjects(g),'Grupos (whatsapp)');
     RAW.crm=cleanRows(csvToObjects(c),'CRM');
+    RAW.pesquisa=cleanRows(csvToObjects(q),'Pesquisa');
     detectColumns();
     setStatus('ok','Ao vivo · '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
     setText('refStatus','Atualizado às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
@@ -693,6 +719,7 @@ function computeDateBounds(){
   const all=[];
   RAW.meta.forEach(r=>{ const d=isoFromMetaDay(r[COLS.metaDay]); if(d) all.push(d); });
   RAW.crm.forEach(r=>{ const d=isoFromCrmData(r[COLS.crmData]); if(d) all.push(d); });
+  RAW.pesquisa.forEach(r=>{ const d=isoFromCrmData(r[COLS.pesqData]); if(d) all.push(d); });
   if(!all.length){ DATE_MIN=toISO(offsetDay(new Date(),-30)); DATE_MAX=toISO(new Date()); return; }
   all.sort(); DATE_MIN=all[0]; DATE_MAX=all[all.length-1];
 }
@@ -783,6 +810,61 @@ function getRange(){
 }
 function filterMeta(f){ return RAW.meta.filter(r=>{ const d=isoFromMetaDay(r[COLS.metaDay]); return d && d>=f.from && d<=f.to; }); }
 function filterCrm(f){ return RAW.crm.filter(r=>{ const d=isoFromCrmData(r[COLS.crmData]); return d && d>=f.from && d<=f.to; }); }
+function filterPesquisa(f){ return RAW.pesquisa.filter(r=>{ const d=isoFromCrmData(r[COLS.pesqData]); return d && d>=f.from && d<=f.to; }); }
+// "Menos de X" sempre fica abaixo; caso contrário usa o primeiro número da faixa (limite inferior)
+// como referência — cobre "1.000 € a 2.000 €", "2.000 € a 3.500 €", "Mais de X", etc.
+function parseIncomeAbove1k(text){
+  const t=normText(text);
+  if(!t) return false;
+  if(t.includes('menos de')) return false;
+  const m=t.match(/(\d{1,3}(?:\.\d{3})*)/);
+  if(!m) return false;
+  const num=parseInt(m[1].replace(/\./g,''),10);
+  return !isNaN(num) && num>=1000;
+}
+function buildDistribution(rows,col){
+  if(!col) return [];
+  const counts={};
+  rows.forEach(r=>{ const v=(r[col]||'').trim(); if(!v) return; counts[v]=(counts[v]||0)+1; });
+  return Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([label,n])=>({label,n}));
+}
+let PIE_CHARTS={};
+function renderPieFor(canvasId,rows,col){
+  const canvas=document.getElementById(canvasId); if(!canvas) return;
+  const dist=buildDistribution(rows,col);
+  const wrap=canvas.closest('.pie-canvas-wrap');
+  if(!dist.length){
+    if(PIE_CHARTS[canvasId]){ PIE_CHARTS[canvasId].destroy(); delete PIE_CHARTS[canvasId]; }
+    if(wrap) wrap.innerHTML='<div class="empty-state">Sem dados no período selecionado</div>';
+    return;
+  }
+  if(wrap && !wrap.querySelector('canvas')){ wrap.innerHTML='<canvas id="'+canvasId+'"></canvas>'; }
+  const freshCanvas=document.getElementById(canvasId);
+  const palette=['#8A604D','#C49C84','#12B60F','#D9B9A9','#27160E','#A67763'];
+  const total=dist.reduce((s,d)=>s+d.n,0);
+  if(PIE_CHARTS[canvasId]) PIE_CHARTS[canvasId].destroy();
+  PIE_CHARTS[canvasId]=new Chart(freshCanvas.getContext('2d'),{
+    type:'doughnut',
+    data:{labels:dist.map(d=>d.label),datasets:[{data:dist.map(d=>d.n),backgroundColor:dist.map((_,i)=>palette[i%palette.length]),borderColor:'#FCF3F1',borderWidth:2}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'bottom',labels:{color:'#3E3E3E',font:{size:10,family:'Sora'},boxWidth:10,padding:8}},
+        tooltip:{backgroundColor:'#27160E',titleColor:'#FFF3E6',bodyColor:'#F3E4DA',padding:10,callbacks:{label:c=>{
+          const v=c.raw; const pct=total>0?(v/total*100).toFixed(1).replace('.',','):'0';
+          return ' '+c.label+': '+fmtN(v)+' ('+pct+'%)';
+        }}}
+      }
+    }
+  });
+}
+function renderPesquisaCharts(rows){
+  renderPieFor('pieIdade',rows,COLS.pesqIdade);
+  renderPieFor('pieFormacao',rows,COLS.pesqFormacao);
+  renderPieFor('pieProfissional',rows,COLS.pesqProfissional);
+  renderPieFor('pieRenda',rows,COLS.pesqRenda);
+  renderPieFor('pieSaude',rows,COLS.pesqSaude);
+}
 
 // ═══ RENDER ═══
 function render(){
@@ -790,6 +872,7 @@ function render(){
   const f=getRange();
   const meta=filterMeta(f);
   const crm=filterCrm(f);
+  const pesquisa=filterPesquisa(f);
 
   // Investimento
   let investCap=0, investRmkt=0;
@@ -854,6 +937,18 @@ function render(){
   setText('tFrioInvest','R$ '+fmtM(tfInvest));
   setText('tFrioCPL','R$ '+fmtM(tfLeads>0?tfInvest/tfLeads:0));
   setText('tFrioLeads',fmtN(tfLeads));
+
+  // Pesquisa de boas-vindas
+  const respondentes=pesquisa.length;
+  const pctRespondidas=leadsGeral>0?respondentes/leadsGeral:0;
+  let rendaAcima1k=0;
+  pesquisa.forEach(r=>{ if(parseIncomeAbove1k(r[COLS.pesqRenda])) rendaAcima1k++; });
+  const pctAcima1k=respondentes>0?rendaAcima1k/respondentes:0;
+  setText('pRespondentes',fmtN(respondentes));
+  setText('pPctRespondidas',fmtP(pctRespondidas));
+  setText('pRendaAcima1k',fmtN(rendaAcima1k));
+  setText('pPctAcima1k',fmtP(pctAcima1k));
+  renderPesquisaCharts(pesquisa);
 
   renderChart(meta,crm);
   renderDailyTable(meta,crm,investCap,leadsPagos);
