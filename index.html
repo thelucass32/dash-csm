@@ -426,7 +426,7 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
 
   <!-- CRUZAMENTO: 3 TABELAS SEPARADAS (campanha / público / criativo) -->
   <div class="section" id="cruzamento-sec">
-    <div class="section-head"><h2 class="section-title">Cruzamento <em>meta × crm</em></h2><span class="section-tag">Clique no cabeçalho para ordenar</span></div>
+    <div class="section-head"><h2 class="section-title">Cruzamento <em>meta × crm</em></h2><span class="section-tag">Campanhas “acoc”+“cap” · renda cruzada por e-mail com a pesquisa · clique no cabeçalho para ordenar</span></div>
 
     <div class="subsection-lbl">Por campanha</div>
     <div class="tbl-card" id="tblCampCard" data-fs-card>
@@ -443,6 +443,8 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
             <th data-sort="ctr">CTR <span class="sort-caret"></span></th>
             <th data-sort="leads">Leads <span class="sort-caret"></span></th>
             <th data-sort="cpl">CPL <span class="sort-caret"></span></th>
+            <th data-sort="rendaAcima1k">Renda acima 1k <span class="sort-caret"></span></th>
+            <th data-sort="pctAcima1k">% acima de 1k <span class="sort-caret"></span></th>
           </tr></thead>
           <tbody id="tblCamp"></tbody>
           <tfoot id="tblCampFoot"></tfoot>
@@ -465,6 +467,8 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
             <th data-sort="ctr">CTR <span class="sort-caret"></span></th>
             <th data-sort="leads">Leads <span class="sort-caret"></span></th>
             <th data-sort="cpl">CPL <span class="sort-caret"></span></th>
+            <th data-sort="rendaAcima1k">Renda acima 1k <span class="sort-caret"></span></th>
+            <th data-sort="pctAcima1k">% acima de 1k <span class="sort-caret"></span></th>
           </tr></thead>
           <tbody id="tblPub"></tbody>
           <tfoot id="tblPubFoot"></tfoot>
@@ -488,6 +492,8 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
             <th data-sort="ctr">CTR <span class="sort-caret"></span></th>
             <th data-sort="leads">Leads <span class="sort-caret"></span></th>
             <th data-sort="cpl">CPL <span class="sort-caret"></span></th>
+            <th data-sort="rendaAcima1k">Renda acima 1k <span class="sort-caret"></span></th>
+            <th data-sort="pctAcima1k">% acima de 1k <span class="sort-caret"></span></th>
             <th>Link</th>
           </tr></thead>
           <tbody id="tblCria"></tbody>
@@ -641,6 +647,8 @@ function isCapturaCampaign(name){ return normText(name).includes('cap'); }
 function isPaidMedium(medium){ return normText(medium).includes('paid'); }
 function isQuenteCampaign(name){ return normText(name).includes('quente'); }
 function isFrioCampaign(name){ return normText(name).includes('frio'); }
+function isAcocCapCampaign(name){ const t=normText(name); return t.includes('acoc') && t.includes('cap'); }
+function normEmail(s){ return String(s||'').trim().toLowerCase(); }
 function setText(id,v){ const e=document.getElementById(id); if(e) e.textContent=v; }
 function toISO(d){ return d.toISOString().slice(0,10); }
 function offsetDay(d,n){ const c=new Date(d); c.setDate(c.getDate()+n); return c; }
@@ -672,11 +680,13 @@ function detectColumns(){
   COLS.crmPublico = colFind(ch,[/publico/]);
   COLS.crmCriativo= colFind(ch,[/criativo/]);
   COLS.crmMedium  = colFind(ch,[/medium/]);
+  COLS.crmEmail   = colFind(ch,[/e-?mail/]);
   COLS.grupoTotal = colFind(gh,[/^total$/]);
   COLS.metaThumb    = colFind(mh,[/thumbnail/,/image.?url/,/\bthumb\b/]);
   COLS.metaPermalink= colFind(mh,[/instagram.?permalink/,/permalink/]);
   const qh=RAW.pesquisa[0]?Object.keys(RAW.pesquisa[0]):[];
   COLS.pesqData        = colFind(qh,[/submitted.?at/,/^data$/,/^date$/]);
+  COLS.pesqEmail       = colFind(qh,[/e-?mail/]);
   COLS.pesqIdade       = colFind(qh,[/idade/]);
   COLS.pesqFormacao    = colFind(qh,[/forma[çc][aã]o/]);
   COLS.pesqProfissional= colFind(qh,[/profissional/]);
@@ -828,6 +838,35 @@ function buildDistribution(rows,col){
   rows.forEach(r=>{ const v=(r[col]||'').trim(); if(!v) return; counts[v]=(counts[v]||0)+1; });
   return Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([label,n])=>({label,n}));
 }
+// Plugin leve (sem CDN extra) que desenha o % dentro de cada fatia dos gráficos de pizza/rosca.
+Chart.register({
+  id:'pieSliceLabels',
+  afterDatasetsDraw(chart){
+    if(chart.config.type!=='doughnut') return;
+    const {ctx}=chart;
+    chart.data.datasets.forEach((dataset,i)=>{
+      const meta=chart.getDatasetMeta(i);
+      const total=dataset.data.reduce((a,b)=>a+(b||0),0);
+      meta.data.forEach((arc,index)=>{
+        const value=dataset.data[index];
+        if(!value||total<=0) return;
+        const pct=value/total*100;
+        if(pct<3) return; // evita poluir fatias muito pequenas
+        const pos=arc.tooltipPosition();
+        ctx.save();
+        ctx.font='700 11px Sora, sans-serif';
+        ctx.textAlign='center';
+        ctx.textBaseline='middle';
+        ctx.lineWidth=3;
+        ctx.strokeStyle='rgba(39,22,14,.65)';
+        ctx.strokeText(pct.toFixed(0)+'%',pos.x,pos.y);
+        ctx.fillStyle='#fff';
+        ctx.fillText(pct.toFixed(0)+'%',pos.x,pos.y);
+        ctx.restore();
+      });
+    });
+  }
+});
 let PIE_CHARTS={};
 function renderPieFor(canvasId,rows,col){
   const canvas=document.getElementById(canvasId); if(!canvas) return;
@@ -952,9 +991,9 @@ function render(){
 
   renderChart(meta,crm);
   renderDailyTable(meta,crm,investCap,leadsPagos);
-  renderCampTable(meta,crm);
-  renderPubTable(meta,crm);
-  renderCriaTable(meta,crm);
+  renderCampTable(meta,crm,pesquisa);
+  renderPubTable(meta,crm,pesquisa);
+  renderCriaTable(meta,crm,pesquisa);
 
   console.log('%c[a comunidade] RENDER ('+f.from+' → '+f.to+')','color:#12B60F;font-weight:bold');
   console.log('  Investimento total: R$ '+fmtM(investTotal)+' (captura R$ '+fmtM(investCap)+' + rmkt R$ '+fmtM(investRmkt)+')');
@@ -1063,12 +1102,22 @@ window.dotbImgFail=function(el){ const s=document.createElement('span'); s.class
 let CAMP_ROWS=[], CAMP_TOTALS=null, SORT_CAMP={key:'invest',dir:'desc'};
 let PUB_ROWS=[], PUB_TOTALS=null, SORT_PUB={key:'invest',dir:'desc'};
 let CRIA_ROWS=[], CRIA_TOTALS=null, SORT_CRIA={key:'invest',dir:'desc'};
-function buildGroup(meta,crm,metaCol,crmCol,withMedia){
+// Cruzamento adicional: e-mail do CRM × e-mail da pesquisa, para saber quantas respostas
+// de cada grupo (campanha/público/criativo) têm renda mensal acima de 1k.
+function buildEmailToRenda(pesquisa){
+  const map={};
+  pesquisa.forEach(r=>{
+    const e=normEmail(r[COLS.pesqEmail]);
+    if(e) map[e]=r[COLS.pesqRenda];
+  });
+  return map;
+}
+function buildGroup(meta,crm,metaCol,crmCol,withMedia,emailToRenda){
   const byKey={};
   meta.forEach(r=>{
     const nome=(r[metaCol]||'').trim(); if(!nome) return;
     const k=normText(nome);
-    const b=byKey[k]=byKey[k]||{nome,invest:0,impr:0,clicks:0,leads:0,thumb:'',permalink:''};
+    const b=byKey[k]=byKey[k]||{nome,invest:0,impr:0,clicks:0,leads:0,thumb:'',permalink:'',matched:0,rendaAcima1k:0};
     b.invest+=toNum(r[COLS.metaSpend]); b.impr+=toNum(r[COLS.metaImpr]); b.clicks+=toNum(r[COLS.metaClicks]);
     if(withMedia){
       if(!b.thumb){ const th=String(r[COLS.metaThumb]||'').trim(); if(th) b.thumb=th; }
@@ -1078,15 +1127,20 @@ function buildGroup(meta,crm,metaCol,crmCol,withMedia){
   crm.forEach(r=>{
     const nome=(r[crmCol]||'').trim(); if(!nome) return;
     const k=normText(nome);
-    const b=byKey[k]=byKey[k]||{nome,invest:0,impr:0,clicks:0,leads:0,thumb:'',permalink:''};
+    const b=byKey[k]=byKey[k]||{nome,invest:0,impr:0,clicks:0,leads:0,thumb:'',permalink:'',matched:0,rendaAcima1k:0};
     b.leads+=1;
+    const email=normEmail(r[COLS.crmEmail]);
+    if(email && Object.prototype.hasOwnProperty.call(emailToRenda,email)){
+      b.matched+=1;
+      if(parseIncomeAbove1k(emailToRenda[email])) b.rendaAcima1k+=1;
+    }
   });
-  return Object.values(byKey).map(b=>({...b,ctr:b.impr>0?b.clicks/b.impr:0,cpl:b.leads>0?b.invest/b.leads:0}));
+  return Object.values(byKey).map(b=>({...b,ctr:b.impr>0?b.clicks/b.impr:0,cpl:b.leads>0?b.invest/b.leads:0,pctAcima1k:b.matched>0?b.rendaAcima1k/b.matched:0}));
 }
 function computeGroupTotals(rows){
-  let tI=0,tImp=0,tC=0,tL=0;
-  rows.forEach(r=>{ tI+=r.invest; tImp+=r.impr; tC+=r.clicks; tL+=r.leads; });
-  return {invest:tI,impr:tImp,clicks:tC,ctr:tImp>0?tC/tImp:0,leads:tL,cpl:tL>0?tI/tL:0};
+  let tI=0,tImp=0,tC=0,tL=0,tM=0,tR=0;
+  rows.forEach(r=>{ tI+=r.invest; tImp+=r.impr; tC+=r.clicks; tL+=r.leads; tM+=r.matched; tR+=r.rendaAcima1k; });
+  return {invest:tI,impr:tImp,clicks:tC,ctr:tImp>0?tC/tImp:0,leads:tL,cpl:tL>0?tI/tL:0,matched:tM,rendaAcima1k:tR,pctAcima1k:tM>0?tR/tM:0};
 }
 function sortGroupRows(rows,sort){
   const {key,dir}=sort, mul=dir==='asc'?1:-1;
@@ -1102,41 +1156,53 @@ function updateSortCaretsFor(tableId,sort){
     const car=th.querySelector('.sort-caret'); if(car) car.textContent=active?(sort.dir==='asc'?'▲':'▼'):'';
   });
 }
-function renderCampTable(meta,crm){ CAMP_ROWS=buildGroup(meta,crm,COLS.metaCamp,COLS.crmCamp,false); CAMP_TOTALS=computeGroupTotals(CAMP_ROWS); paintCampTable(); }
+function renderCampTable(meta,crm,pesquisa){
+  const emailToRenda=buildEmailToRenda(pesquisa);
+  const m2=meta.filter(r=>isAcocCapCampaign(r[COLS.metaCamp])), c2=crm.filter(r=>isAcocCapCampaign(r[COLS.crmCamp]));
+  CAMP_ROWS=buildGroup(m2,c2,COLS.metaCamp,COLS.crmCamp,false,emailToRenda); CAMP_TOTALS=computeGroupTotals(CAMP_ROWS); paintCampTable();
+}
 function paintCampTable(){
   const body=document.getElementById('tblCamp'), foot=document.getElementById('tblCampFoot');
   if(!body) return;
-  if(!CAMP_ROWS.length){ body.innerHTML='<tr><td colspan="7" class="empty-state">Nenhum dado no período selecionado</td></tr>'; foot.innerHTML=''; updateSortCaretsFor('tblCampTable',SORT_CAMP); return; }
+  if(!CAMP_ROWS.length){ body.innerHTML='<tr><td colspan="9" class="empty-state">Nenhum dado no período selecionado</td></tr>'; foot.innerHTML=''; updateSortCaretsFor('tblCampTable',SORT_CAMP); return; }
   const sorted=sortGroupRows(CAMP_ROWS,SORT_CAMP);
-  body.innerHTML=sorted.map(r=>'<tr><td>'+r.nome+'</td><td>R$ '+fmtM(r.invest)+'</td><td>'+fmtN(r.impr)+'</td><td>'+fmtN(r.clicks)+'</td><td>'+fmtP(r.ctr)+'</td><td>'+fmtN(r.leads)+'</td><td>R$ '+fmtM(r.cpl)+'</td></tr>').join('');
+  body.innerHTML=sorted.map(r=>'<tr><td>'+r.nome+'</td><td>R$ '+fmtM(r.invest)+'</td><td>'+fmtN(r.impr)+'</td><td>'+fmtN(r.clicks)+'</td><td>'+fmtP(r.ctr)+'</td><td>'+fmtN(r.leads)+'</td><td>R$ '+fmtM(r.cpl)+'</td><td>'+fmtN(r.rendaAcima1k)+'</td><td>'+fmtP(r.pctAcima1k)+'</td></tr>').join('');
   const t=CAMP_TOTALS;
-  foot.innerHTML='<tr><td>Total</td><td>R$ '+fmtM(t.invest)+'</td><td>'+fmtN(t.impr)+'</td><td>'+fmtN(t.clicks)+'</td><td>'+fmtP(t.ctr)+'</td><td>'+fmtN(t.leads)+'</td><td>R$ '+fmtM(t.cpl)+'</td></tr>';
+  foot.innerHTML='<tr><td>Total</td><td>R$ '+fmtM(t.invest)+'</td><td>'+fmtN(t.impr)+'</td><td>'+fmtN(t.clicks)+'</td><td>'+fmtP(t.ctr)+'</td><td>'+fmtN(t.leads)+'</td><td>R$ '+fmtM(t.cpl)+'</td><td>'+fmtN(t.rendaAcima1k)+'</td><td>'+fmtP(t.pctAcima1k)+'</td></tr>';
   updateSortCaretsFor('tblCampTable',SORT_CAMP);
 }
-function renderPubTable(meta,crm){ PUB_ROWS=buildGroup(meta,crm,COLS.metaAdset,COLS.crmPublico,false); PUB_TOTALS=computeGroupTotals(PUB_ROWS); paintPubTable(); }
+function renderPubTable(meta,crm,pesquisa){
+  const emailToRenda=buildEmailToRenda(pesquisa);
+  const m2=meta.filter(r=>isAcocCapCampaign(r[COLS.metaCamp])), c2=crm.filter(r=>isAcocCapCampaign(r[COLS.crmCamp]));
+  PUB_ROWS=buildGroup(m2,c2,COLS.metaAdset,COLS.crmPublico,false,emailToRenda); PUB_TOTALS=computeGroupTotals(PUB_ROWS); paintPubTable();
+}
 function paintPubTable(){
   const body=document.getElementById('tblPub'), foot=document.getElementById('tblPubFoot');
   if(!body) return;
-  if(!PUB_ROWS.length){ body.innerHTML='<tr><td colspan="7" class="empty-state">Nenhum dado no período selecionado</td></tr>'; foot.innerHTML=''; updateSortCaretsFor('tblPubTable',SORT_PUB); return; }
+  if(!PUB_ROWS.length){ body.innerHTML='<tr><td colspan="9" class="empty-state">Nenhum dado no período selecionado</td></tr>'; foot.innerHTML=''; updateSortCaretsFor('tblPubTable',SORT_PUB); return; }
   const sorted=sortGroupRows(PUB_ROWS,SORT_PUB);
-  body.innerHTML=sorted.map(r=>'<tr><td>'+r.nome+'</td><td>R$ '+fmtM(r.invest)+'</td><td>'+fmtN(r.impr)+'</td><td>'+fmtN(r.clicks)+'</td><td>'+fmtP(r.ctr)+'</td><td>'+fmtN(r.leads)+'</td><td>R$ '+fmtM(r.cpl)+'</td></tr>').join('');
+  body.innerHTML=sorted.map(r=>'<tr><td>'+r.nome+'</td><td>R$ '+fmtM(r.invest)+'</td><td>'+fmtN(r.impr)+'</td><td>'+fmtN(r.clicks)+'</td><td>'+fmtP(r.ctr)+'</td><td>'+fmtN(r.leads)+'</td><td>R$ '+fmtM(r.cpl)+'</td><td>'+fmtN(r.rendaAcima1k)+'</td><td>'+fmtP(r.pctAcima1k)+'</td></tr>').join('');
   const t=PUB_TOTALS;
-  foot.innerHTML='<tr><td>Total</td><td>R$ '+fmtM(t.invest)+'</td><td>'+fmtN(t.impr)+'</td><td>'+fmtN(t.clicks)+'</td><td>'+fmtP(t.ctr)+'</td><td>'+fmtN(t.leads)+'</td><td>R$ '+fmtM(t.cpl)+'</td></tr>';
+  foot.innerHTML='<tr><td>Total</td><td>R$ '+fmtM(t.invest)+'</td><td>'+fmtN(t.impr)+'</td><td>'+fmtN(t.clicks)+'</td><td>'+fmtP(t.ctr)+'</td><td>'+fmtN(t.leads)+'</td><td>R$ '+fmtM(t.cpl)+'</td><td>'+fmtN(t.rendaAcima1k)+'</td><td>'+fmtP(t.pctAcima1k)+'</td></tr>';
   updateSortCaretsFor('tblPubTable',SORT_PUB);
 }
-function renderCriaTable(meta,crm){ CRIA_ROWS=buildGroup(meta,crm,COLS.metaAd,COLS.crmCriativo,true); CRIA_TOTALS=computeGroupTotals(CRIA_ROWS); paintCriaTable(); }
+function renderCriaTable(meta,crm,pesquisa){
+  const emailToRenda=buildEmailToRenda(pesquisa);
+  const m2=meta.filter(r=>isAcocCapCampaign(r[COLS.metaCamp])), c2=crm.filter(r=>isAcocCapCampaign(r[COLS.crmCamp]));
+  CRIA_ROWS=buildGroup(m2,c2,COLS.metaAd,COLS.crmCriativo,true,emailToRenda); CRIA_TOTALS=computeGroupTotals(CRIA_ROWS); paintCriaTable();
+}
 function paintCriaTable(){
   const body=document.getElementById('tblCria'), foot=document.getElementById('tblCriaFoot');
   if(!body) return;
-  if(!CRIA_ROWS.length){ body.innerHTML='<tr><td colspan="9" class="empty-state">Nenhum dado no período selecionado</td></tr>'; foot.innerHTML=''; updateSortCaretsFor('tblCriaTable',SORT_CRIA); return; }
+  if(!CRIA_ROWS.length){ body.innerHTML='<tr><td colspan="11" class="empty-state">Nenhum dado no período selecionado</td></tr>'; foot.innerHTML=''; updateSortCaretsFor('tblCriaTable',SORT_CRIA); return; }
   const sorted=sortGroupRows(CRIA_ROWS,SORT_CRIA);
   body.innerHTML=sorted.map(r=>{
     const thumbCell=r.thumb?'<img class="cr-thumb" src="'+escAttr(r.thumb)+'" loading="lazy" referrerpolicy="no-referrer" alt="" onerror="dotbImgFail(this)">':'<span class="cr-noimg">—</span>';
     const linkCell=r.permalink?'<a class="ig-link" href="'+escAttr(r.permalink)+'" target="_blank" rel="noopener" title="Abrir criativo">'+IG_SVG+'</a>':'<span style="color:var(--text-muted)">—</span>';
-    return '<tr><td class="cr-thumb-cell">'+thumbCell+'</td><td>'+r.nome+'</td><td>R$ '+fmtM(r.invest)+'</td><td>'+fmtN(r.impr)+'</td><td>'+fmtN(r.clicks)+'</td><td>'+fmtP(r.ctr)+'</td><td>'+fmtN(r.leads)+'</td><td>R$ '+fmtM(r.cpl)+'</td><td>'+linkCell+'</td></tr>';
+    return '<tr><td class="cr-thumb-cell">'+thumbCell+'</td><td>'+r.nome+'</td><td>R$ '+fmtM(r.invest)+'</td><td>'+fmtN(r.impr)+'</td><td>'+fmtN(r.clicks)+'</td><td>'+fmtP(r.ctr)+'</td><td>'+fmtN(r.leads)+'</td><td>R$ '+fmtM(r.cpl)+'</td><td>'+fmtN(r.rendaAcima1k)+'</td><td>'+fmtP(r.pctAcima1k)+'</td><td>'+linkCell+'</td></tr>';
   }).join('');
   const t=CRIA_TOTALS;
-  foot.innerHTML='<tr><td></td><td>Total</td><td>R$ '+fmtM(t.invest)+'</td><td>'+fmtN(t.impr)+'</td><td>'+fmtN(t.clicks)+'</td><td>'+fmtP(t.ctr)+'</td><td>'+fmtN(t.leads)+'</td><td>R$ '+fmtM(t.cpl)+'</td><td></td></tr>';
+  foot.innerHTML='<tr><td></td><td>Total</td><td>R$ '+fmtM(t.invest)+'</td><td>'+fmtN(t.impr)+'</td><td>'+fmtN(t.clicks)+'</td><td>'+fmtP(t.ctr)+'</td><td>'+fmtN(t.leads)+'</td><td>R$ '+fmtM(t.cpl)+'</td><td>'+fmtN(t.rendaAcima1k)+'</td><td>'+fmtP(t.pctAcima1k)+'</td><td></td></tr>';
   updateSortCaretsFor('tblCriaTable',SORT_CRIA);
 }
 
