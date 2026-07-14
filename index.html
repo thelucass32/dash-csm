@@ -243,13 +243,13 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
     <a href="#kpis" class="active">KPIs</a>
     <a href="#captacao-sec">Captação</a>
     <a href="#pesquisa-sec">Pesquisa</a>
-    <a href="#pesquisa-charts-sec">Respostas da pesquisa</a>
     <a href="#chart-sec">Evolução diária</a>
-    <a href="#sec-metrics-sec">Métricas secundárias</a>
+    <a href="#daily-table-sec">Tabela diária</a>
     <a href="#funnel-sec">Funil de captação</a>
     <a href="#temperatura-sec">Temperatura</a>
-    <a href="#daily-table-sec">Tabela diária</a>
     <a href="#cruzamento-sec">Cruzamento</a>
+    <a href="#sec-metrics-sec">Métricas secundárias</a>
+    <a href="#pesquisa-charts-sec">Respostas da pesquisa</a>
   </div>
 </nav>
 <div class="wrap">
@@ -328,17 +328,6 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
       <div class="kpi"><div class="kpi-lbl">% acima de 1k</div><div class="kpi-val" id="pPctAcima1k">—</div><div class="kpi-sub">acima de 1k ÷ total de respostas</div></div>
     </div>
   </div>
-  <!-- PESQUISA · GRÁFICOS DE PIZZA -->
-  <div class="section" id="pesquisa-charts-sec">
-    <div class="section-head"><h2 class="section-title">Pesquisa <em>· respostas</em></h2><span class="section-tag">Distribuição por pergunta</span></div>
-    <div class="pie-grid">
-      <div class="chart-card pie-card"><h3 class="pie-title">Idade</h3><div class="pie-canvas-wrap"><canvas id="pieIdade"></canvas></div></div>
-      <div class="chart-card pie-card"><h3 class="pie-title">Formação acadêmica</h3><div class="pie-canvas-wrap"><canvas id="pieFormacao"></canvas></div></div>
-      <div class="chart-card pie-card"><h3 class="pie-title">Situação profissional</h3><div class="pie-canvas-wrap"><canvas id="pieProfissional"></canvas></div></div>
-      <div class="chart-card pie-card"><h3 class="pie-title">Rendimento mensal</h3><div class="pie-canvas-wrap"><canvas id="pieRenda"></canvas></div></div>
-      <div class="chart-card pie-card"><h3 class="pie-title">Investimento em saúde / bem-estar</h3><div class="pie-canvas-wrap"><canvas id="pieSaude"></canvas></div></div>
-    </div>
-  </div>
   <!-- CHART -->
   <div class="section" id="chart-sec">
     <div class="section-head"><h2 class="section-title">Evolução <em>diária</em></h2><span class="section-tag">Leads · custo · CPL</span></div>
@@ -354,24 +343,28 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
       <div class="chart-canvas-wrap"><canvas id="chartDaily"></canvas></div>
     </div>
   </div>
-  <!-- MÉTRICAS SECUNDÁRIAS -->
-  <div class="section" id="sec-metrics-sec">
-    <div class="section-head"><h2 class="section-title">Métricas <em>secundárias</em></h2><span class="section-tag">Análise de criativos · tendências diárias · campanhas “cap”</span></div>
-    <div class="subsection-lbl">Análise de anúncios · bolhas (leads × CPL)</div>
-    <div class="chart-card" id="bubbleCard" data-fs-card style="margin-bottom:20px;">
-      <button class="fs-btn" id="bubbleFsBtn" title="Tela cheia" aria-label="Tela cheia">
+  <!-- DAILY TABLE -->
+  <div class="section" id="daily-table-sec">
+    <div class="section-head"><h2 class="section-title">Leads <em>× CPL × custo</em></h2><span class="section-tag">Por dia · clique no cabeçalho para ordenar</span></div>
+    <div class="tbl-card" id="tblCard" data-fs-card>
+      <button class="fs-btn" id="tblFsBtn" title="Tela cheia" aria-label="Tela cheia">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
       </button>
-      <h3 class="sec-chart-title">Análise Anúncios</h3>
-      <div class="sec-chart-sub">Cada bolha é um criativo · eixo X = leads · eixo Y = CPL · tamanho = leads</div>
-      <div class="bubble-canvas-wrap"><canvas id="bubbleCria"></canvas></div>
-    </div>
-    <div class="subsection-lbl">Tendências diárias por KPI</div>
-    <div class="sec-charts-grid">
-      <div class="chart-card sec-chart-card"><h3 class="sec-chart-title">% conversão de página</h3><div class="sec-chart-sub">leads pagos ÷ visualizações de página</div><div class="sec-canvas-wrap"><canvas id="lineConv"></canvas></div></div>
-      <div class="chart-card sec-chart-card"><h3 class="sec-chart-title">CTR</h3><div class="sec-chart-sub">cliques no link ÷ impressões</div><div class="sec-canvas-wrap"><canvas id="lineCTR"></canvas></div></div>
-      <div class="chart-card sec-chart-card"><h3 class="sec-chart-title">CPM</h3><div class="sec-chart-sub">custo por mil impressões</div><div class="sec-canvas-wrap"><canvas id="lineCPM"></canvas></div></div>
-      <div class="chart-card sec-chart-card"><h3 class="sec-chart-title">Connect rate</h3><div class="sec-chart-sub">visualizações de página ÷ cliques no link</div><div class="sec-canvas-wrap"><canvas id="lineConn"></canvas></div></div>
+      <div class="tbl-scroll">
+        <table class="tbl">
+          <thead><tr>
+            <th data-sort="day">Dia <span class="sort-caret"></span></th>
+            <th data-sort="custo">Custo total <span class="sort-caret"></span></th>
+            <th data-sort="leadsGeral">Leads totais <span class="sort-caret"></span></th>
+            <th data-sort="leadsPagos">Leads pagos <span class="sort-caret"></span></th>
+            <th data-sort="leadsOrg">Leads org <span class="sort-caret"></span></th>
+            <th data-sort="cplGeral">CPL geral <span class="sort-caret"></span></th>
+            <th data-sort="cplPago">CPL pago <span class="sort-caret"></span></th>
+          </tr></thead>
+          <tbody id="tblDaily"></tbody>
+          <tfoot id="tblDailyFoot"></tfoot>
+        </table>
+      </div>
     </div>
   </div>
   <!-- FUNIL -->
@@ -427,30 +420,6 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
           <div class="fmk"><div class="fmk-lbl">CPL</div><div class="fmk-val" id="tFrioCPL">—</div></div>
           <div class="fmk"><div class="fmk-lbl">Leads</div><div class="fmk-val" id="tFrioLeads">—</div></div>
         </div>
-      </div>
-    </div>
-  </div>
-  <!-- DAILY TABLE -->
-  <div class="section" id="daily-table-sec">
-    <div class="section-head"><h2 class="section-title">Leads <em>× CPL × custo</em></h2><span class="section-tag">Por dia · clique no cabeçalho para ordenar</span></div>
-    <div class="tbl-card" id="tblCard" data-fs-card>
-      <button class="fs-btn" id="tblFsBtn" title="Tela cheia" aria-label="Tela cheia">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
-      </button>
-      <div class="tbl-scroll">
-        <table class="tbl">
-          <thead><tr>
-            <th data-sort="day">Dia <span class="sort-caret"></span></th>
-            <th data-sort="custo">Custo total <span class="sort-caret"></span></th>
-            <th data-sort="leadsGeral">Leads totais <span class="sort-caret"></span></th>
-            <th data-sort="leadsPagos">Leads pagos <span class="sort-caret"></span></th>
-            <th data-sort="leadsOrg">Leads org <span class="sort-caret"></span></th>
-            <th data-sort="cplGeral">CPL geral <span class="sort-caret"></span></th>
-            <th data-sort="cplPago">CPL pago <span class="sort-caret"></span></th>
-          </tr></thead>
-          <tbody id="tblDaily"></tbody>
-          <tfoot id="tblDailyFoot"></tfoot>
-        </table>
       </div>
     </div>
   </div>
@@ -527,6 +496,37 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
           <tfoot id="tblCriaFoot"></tfoot>
         </table>
       </div>
+    </div>
+  </div>
+  <!-- MÉTRICAS SECUNDÁRIAS -->
+  <div class="section" id="sec-metrics-sec">
+    <div class="section-head"><h2 class="section-title">Métricas <em>secundárias</em></h2><span class="section-tag">Análise de criativos · tendências diárias · campanhas “cap”</span></div>
+    <div class="subsection-lbl">Análise de anúncios · bolhas (leads × CPL)</div>
+    <div class="chart-card" id="bubbleCard" data-fs-card style="margin-bottom:20px;">
+      <button class="fs-btn" id="bubbleFsBtn" title="Tela cheia" aria-label="Tela cheia">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+      </button>
+      <h3 class="sec-chart-title">Análise Anúncios</h3>
+      <div class="sec-chart-sub">Cada bolha é um criativo · eixo X = leads · eixo Y = CPL · tamanho = leads</div>
+      <div class="bubble-canvas-wrap"><canvas id="bubbleCria"></canvas></div>
+    </div>
+    <div class="subsection-lbl">Tendências diárias por KPI</div>
+    <div class="sec-charts-grid">
+      <div class="chart-card sec-chart-card"><h3 class="sec-chart-title">% conversão de página</h3><div class="sec-chart-sub">leads pagos ÷ visualizações de página</div><div class="sec-canvas-wrap"><canvas id="lineConv"></canvas></div></div>
+      <div class="chart-card sec-chart-card"><h3 class="sec-chart-title">CTR</h3><div class="sec-chart-sub">cliques no link ÷ impressões</div><div class="sec-canvas-wrap"><canvas id="lineCTR"></canvas></div></div>
+      <div class="chart-card sec-chart-card"><h3 class="sec-chart-title">CPM</h3><div class="sec-chart-sub">custo por mil impressões</div><div class="sec-canvas-wrap"><canvas id="lineCPM"></canvas></div></div>
+      <div class="chart-card sec-chart-card"><h3 class="sec-chart-title">Connect rate</h3><div class="sec-chart-sub">visualizações de página ÷ cliques no link</div><div class="sec-canvas-wrap"><canvas id="lineConn"></canvas></div></div>
+    </div>
+  </div>
+  <!-- PESQUISA · GRÁFICOS DE PIZZA -->
+  <div class="section" id="pesquisa-charts-sec">
+    <div class="section-head"><h2 class="section-title">Pesquisa <em>· respostas</em></h2><span class="section-tag">Distribuição por pergunta</span></div>
+    <div class="pie-grid">
+      <div class="chart-card pie-card"><h3 class="pie-title">Idade</h3><div class="pie-canvas-wrap"><canvas id="pieIdade"></canvas></div></div>
+      <div class="chart-card pie-card"><h3 class="pie-title">Formação acadêmica</h3><div class="pie-canvas-wrap"><canvas id="pieFormacao"></canvas></div></div>
+      <div class="chart-card pie-card"><h3 class="pie-title">Situação profissional</h3><div class="pie-canvas-wrap"><canvas id="pieProfissional"></canvas></div></div>
+      <div class="chart-card pie-card"><h3 class="pie-title">Rendimento mensal</h3><div class="pie-canvas-wrap"><canvas id="pieRenda"></canvas></div></div>
+      <div class="chart-card pie-card"><h3 class="pie-title">Investimento em saúde / bem-estar</h3><div class="pie-canvas-wrap"><canvas id="pieSaude"></canvas></div></div>
     </div>
   </div>
 </div>
@@ -1158,7 +1158,7 @@ function renderFunnelBars(containerId,stages,empty){
   const max=Math.max(1,...stages.map(s=>s.n));
   wrap.innerHTML=stages.map((s,i)=>{
     const w=empty?100:Math.max(4,Math.round((s.n/max)*100));
-    const rateHtml = i>0 && !empty ? '<div class="fbar-rate"><svg viewBox="0 0 24 24" fill="none"><path d="M12 4v15M12 19l-4-4M12 19l4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'+(stages[0].n>0?fmtP(s.n/stages[0].n):'—')+' do topo</div>' : '';
+    const rateHtml = '';
     return (i>0?rateHtml:'')+'<div class="fbar-row"><div class="fbar-lbl-side">'+s.lbl+'</div><div class="fbar-track"><div class="fbar-fill" style="width:'+w+'%;background:'+(empty?'var(--divider)':s.color)+';"></div></div><div class="fbar-num">'+(empty?'—':fmtN(s.n))+'</div></div>';
   }).join('');
 }
