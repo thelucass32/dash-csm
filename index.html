@@ -116,27 +116,15 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
 .kpi-val .cur{font-size:12px;color:var(--text-muted);margin-right:3px;font-weight:400;}
 .kpi-sub{font-size:10.5px;color:var(--text-muted);margin-top:6px;}
 .kpi.muted{opacity:.55;}
+.kpi-goal{margin-top:11px;}
+.kpi-goal-track{height:7px;border-radius:20px;background:var(--surface-alt);border:0.5px solid var(--divider);overflow:hidden;}
+.kpi-goal-fill{height:100%;border-radius:20px;background:var(--accent);transition:width .6s ease;min-width:3px;width:0;}
+.kpi-goal-txt{font-size:10px;color:var(--text-muted);margin-top:6px;line-height:1.35;}
+.kpi-goal-txt b{color:var(--title);font-weight:700;}
+.kpi-goal-txt b.hit{color:var(--accent-dark);}
 .badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:500;}
 .badge-caramel{background:var(--brand-caramel);color:var(--surface-dark);}
 .badge-green{background:rgba(18,182,15,.14);color:var(--accent-dark);}
-/* GOAL / META DE GASTOS */
-.goal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;}
-.goal-card{background:var(--surface);border:0.5px solid var(--divider);border-radius:var(--r-lg);padding:20px 20px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
-.goal-lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);font-weight:500;}
-.goal-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:10px;}
-.goal-val{font-size:27px;font-weight:700;color:var(--title);line-height:1.05;}
-.goal-val .cur{font-size:13px;color:var(--text-muted);margin-right:2px;font-weight:400;}
-.goal-pct{font-size:15px;font-weight:700;}
-.goal-pct.ok{color:var(--accent-dark);}
-.goal-pct.mid{color:var(--brand-brown);}
-.goal-pct.over{color:var(--negative);}
-.goal-bar-track{margin-top:12px;height:12px;border-radius:20px;background:var(--surface-alt);border:0.5px solid var(--divider);overflow:hidden;}
-.goal-bar-fill{height:100%;border-radius:20px;transition:width .6s ease;min-width:4px;}
-.goal-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;}
-.goal-meta-lbl{font-size:11px;color:var(--text-muted);}
-.goal-meta-lbl b{color:var(--title);font-weight:700;}
-.goal-remaining{font-size:11px;color:var(--text-muted);font-weight:500;}
-.goal-remaining.done{color:var(--accent-dark);}
 /* CHART */
 .chart-card{background:var(--surface);border:0.5px solid var(--divider);border-radius:var(--r-lg);padding:22px 22px 14px;position:relative;box-shadow:var(--shadow);}
 .chart-legend{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:14px;}
@@ -253,7 +241,6 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
 <nav class="subnav">
   <div class="subnav-inner">
     <a href="#kpis" class="active">KPIs</a>
-    <a href="#meta-sec">Meta de gastos</a>
     <a href="#captacao-sec">Captação</a>
     <a href="#pesquisa-sec">Pesquisa</a>
     <a href="#pesquisa-charts-sec">Respostas da pesquisa</a>
@@ -311,20 +298,15 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
   </div>
   <!-- KPIs GERAIS -->
   <div class="section" id="kpis">
-    <div class="section-head"><h2 class="section-title">Visão <em>geral</em></h2><span class="section-tag">Investimento &amp; leads · captura + rmkt</span></div>
+    <div class="section-head"><h2 class="section-title">Visão <em>geral</em></h2><span class="section-tag">Investimento &amp; leads · meta da aba acompanhamento</span></div>
     <div class="kpi-grid">
-      <div class="kpi"><div class="kpi-lbl">Investimento total</div><div class="kpi-val"><span class="cur">$</span><span id="kInvestTotal">—</span></div><div class="kpi-sub">todas as campanhas</div></div>
-      <div class="kpi"><div class="kpi-lbl">Investimento captura</div><div class="kpi-val"><span class="cur">$</span><span id="kInvestCap">—</span></div><div class="kpi-sub">campanhas com “cap”</div></div>
-      <div class="kpi"><div class="kpi-lbl">Investimento rmkt</div><div class="kpi-val"><span class="cur">$</span><span id="kInvestRmkt">—</span></div><div class="kpi-sub">demais campanhas</div></div>
+      <div class="kpi"><div class="kpi-lbl">Investimento total</div><div class="kpi-val"><span class="cur">$</span><span id="kInvestTotal">—</span></div><div class="kpi-goal"><div class="kpi-goal-track"><div class="kpi-goal-fill" id="kGoalTotalFill"></div></div><div class="kpi-goal-txt" id="kGoalTotalTxt">—</div></div></div>
+      <div class="kpi"><div class="kpi-lbl">Investimento captura</div><div class="kpi-val"><span class="cur">$</span><span id="kInvestCap">—</span></div><div class="kpi-goal"><div class="kpi-goal-track"><div class="kpi-goal-fill" id="kGoalCapFill"></div></div><div class="kpi-goal-txt" id="kGoalCapTxt">—</div></div></div>
+      <div class="kpi"><div class="kpi-lbl">Investimento rmkt</div><div class="kpi-val"><span class="cur">$</span><span id="kInvestRmkt">—</span></div><div class="kpi-goal"><div class="kpi-goal-track"><div class="kpi-goal-fill" id="kGoalRmktFill"></div></div><div class="kpi-goal-txt" id="kGoalRmktTxt">—</div></div></div>
       <div class="kpi"><div class="kpi-lbl">Leads geral</div><div class="kpi-val" id="kLeadsGeral">—</div><div class="kpi-sub">pagos + orgânicos</div></div>
       <div class="kpi"><div class="kpi-lbl">Leads pagos</div><div class="kpi-val" id="kLeadsPagos">—</div><div class="kpi-sub">medium contém “paid”</div></div>
       <div class="kpi"><div class="kpi-lbl">Leads orgânicos</div><div class="kpi-val" id="kLeadsOrg">—</div><div class="kpi-sub">medium sem “paid”</div></div>
     </div>
-  </div>
-  <!-- META DE GASTOS -->
-  <div class="section" id="meta-sec">
-    <div class="section-head"><h2 class="section-title">Meta de <em>gastos</em></h2><span class="section-tag">Aba acompanhamento · quanto falta para bater a meta</span></div>
-    <div class="goal-grid" id="metaGoals"><div class="empty-state">Carregando acompanhamento…</div></div>
   </div>
   <!-- CAPTAÇÃO -->
   <div class="section" id="captacao-sec">
@@ -734,22 +716,11 @@ function detectColumns(){
   COLS.pesqProfissional= colFind(qh,[/profissional/]);
   COLS.pesqRenda       = colFind(qh,[/rendimento/]);
   COLS.pesqSaude       = colFind(qh,[/sa[uú]de/,/bem.?estar/]);
-  // ── Aba acompanhamento (meta de gastos) ──
-  const ah=RAW.acomp[0]?Object.keys(RAW.acomp[0]):[];
-  COLS.acompLabel = colFind(ah,[/campanha/,/nome/,/descri/,/^item$/,/categoria/,/tipo/,/indicador/,/^conta$/]) || ah[0] || null;
-  COLS.acompMeta  = colFind(ah,[/meta/,/objetivo/,/goal/,/planejad/,/previst/,/or[çc]ament/,/target/,/limite/,/teto/]);
-  COLS.acompReal  = colFind(ah,[/realizad/,/\bgast/,/investid/,/usado/,/atual/,/spent/,/acumulad/,/^valor$/,/executad/]);
-  // Fallback: usa as colunas numéricas (excluindo a de rótulo) se algum padrão não bater
-  if(!COLS.acompReal || !COLS.acompMeta || COLS.acompReal===COLS.acompMeta){
-    const numCols=ah.filter(h=>h!==COLS.acompLabel && RAW.acomp.some(r=>toNum(r[h])>0));
-    if(!COLS.acompReal || COLS.acompReal===COLS.acompMeta) COLS.acompReal=numCols[0]||COLS.acompReal||null;
-    if(!COLS.acompMeta || COLS.acompMeta===COLS.acompReal) COLS.acompMeta=numCols.find(c=>c!==COLS.acompReal)||numCols[1]||COLS.acompMeta||null;
-  }
   console.log('%c[a comunidade] Colunas detectadas:','color:#12B60F;font-weight:bold',COLS);
   console.log('[a comunidade] Cabeçalhos meta:',mh);
   console.log('[a comunidade] Cabeçalhos crm:',ch);
   console.log('[a comunidade] Cabeçalhos grupos:',gh);
-  console.log('[a comunidade] Cabeçalhos acompanhamento:',ah);
+  console.log('[a comunidade] Cabeçalhos acompanhamento:',RAW.acomp[0]?Object.keys(RAW.acomp[0]):[]);
 }
 // ═══ LOAD ═══
 async function loadData(){
@@ -956,39 +927,54 @@ function renderPesquisaCharts(rows){
   renderPieFor('pieRenda',rows,COLS.pesqRenda);
   renderPieFor('pieSaude',rows,COLS.pesqSaude);
 }
-// ═══ META DE GASTOS (aba acompanhamento) ═══
-function renderMetas(){
-  const wrap=document.getElementById('metaGoals'); if(!wrap) return;
-  if(!RAW.acomp.length || !COLS.acompMeta){
-    wrap.innerHTML='<div class="empty-state">Sem dados de acompanhamento — confira os cabeçalhos da aba (esperado: rótulo + realizado + meta).</div>';
-    return;
+// ═══ METAS DE GASTO (aba acompanhamento) ═══
+// Opcional: defina valores fixos aqui para ignorar a detecção automática da aba.
+// Ex.: const GOAL_OVERRIDE = { total:75000, captura:0, rmkt:0 };
+const GOAL_OVERRIDE = { total:0, captura:0, rmkt:0 };
+// Maior número presente em toda a aba acompanhamento (usado como meta total quando
+// não há um rótulo "total" explícito — ex.: a meta de 75.000).
+function acompMaxNumber(){
+  let m=0;
+  RAW.acomp.forEach(row=>Object.values(row).forEach(v=>{ const n=toNum(v); if(n>m) m=n; }));
+  return m;
+}
+// Procura a meta de uma fase: pega a primeira linha cujo VALOR de alguma célula contém
+// uma das palavras-chave e devolve o maior número dessa linha.
+function acompGoalByKeyword(keywords){
+  for(const row of RAW.acomp){
+    let hit=false, best=0;
+    for(const v of Object.values(row)){
+      if(keywords.some(kw=>normText(v).includes(kw))) hit=true;
+      const n=toNum(v); if(n>best) best=n;
+    }
+    if(hit && best>0) return best;
   }
-  const rows=RAW.acomp.filter(r=>{
-    const lbl=String(r[COLS.acompLabel]||'').trim();
-    return lbl && (toNum(r[COLS.acompMeta])>0 || toNum(r[COLS.acompReal])>0);
-  });
-  if(!rows.length){ wrap.innerHTML='<div class="empty-state">Sem metas cadastradas na aba acompanhamento.</div>'; return; }
-  wrap.innerHTML=rows.map(r=>{
-    const lbl=String(r[COLS.acompLabel]||'—');
-    const real=toNum(r[COLS.acompReal]);
-    const goal=toNum(r[COLS.acompMeta]);
-    const pct=goal>0? real/goal : 0;
-    const w=Math.max(2,Math.min(100,Math.round(pct*100)));
-    const remaining=goal-real;
-    const over=real>goal;
-    const cls = over?'over': pct>=0.9?'ok':'mid';
-    const fill = over?'var(--negative)': pct>=0.9?'var(--accent)': pct>=0.5?'#C49C84':'#8A604D';
-    const footRight = over
-      ? '<span class="goal-remaining done">meta batida · +$ '+fmtN(Math.abs(remaining))+'</span>'
-      : '<span class="goal-remaining">faltam $ '+fmtN(Math.max(0,remaining))+'</span>';
-    const pctTxt=(pct*100>=10?(pct*100).toFixed(0):(pct*100).toFixed(1)).replace('.',',');
-    return '<div class="goal-card">'
-      + '<div class="goal-lbl">'+lbl+'</div>'
-      + '<div class="goal-top"><div class="goal-val"><span class="cur">$</span>'+fmtN(real)+'</div><div class="goal-pct '+cls+'">'+pctTxt+'%</div></div>'
-      + '<div class="goal-bar-track"><div class="goal-bar-fill" style="width:'+w+'%;background:'+fill+';"></div></div>'
-      + '<div class="goal-foot"><span class="goal-meta-lbl">meta <b>$ '+fmtN(goal)+'</b></span>'+footRight+'</div>'
-      + '</div>';
-  }).join('');
+  return 0;
+}
+function updateGoalCard(suffix, real, goal){
+  const fill=document.getElementById('kGoal'+suffix+'Fill');
+  const txt=document.getElementById('kGoal'+suffix+'Txt');
+  if(!fill||!txt) return;
+  if(!goal || goal<=0){ fill.style.width='0%'; txt.innerHTML='meta não encontrada na aba'; return; }
+  const pct=real/goal;
+  const w=Math.max(2,Math.min(100,Math.round(pct*100)));
+  fill.style.width=w+'%';
+  fill.style.background = pct>=0.7 ? 'var(--accent)' : '#C49C84';
+  if(pct>=1){
+    txt.innerHTML='<b class="hit">meta batida</b> · '+fmtN(real)+' de $ '+fmtN(goal)+' ('+fmtP(pct)+')';
+  } else {
+    const faltaPct=Math.max(0,1-pct);
+    txt.innerHTML='falta <b>'+fmtP(faltaPct)+'</b> para a meta de $ '+fmtN(goal)+' · faltam $ '+fmtN(goal-real);
+  }
+}
+function renderGoals(investTotal, investCap, investRmkt){
+  const gTotal = GOAL_OVERRIDE.total   || acompGoalByKeyword(['total','geral','todas']) || acompMaxNumber();
+  const gCap   = GOAL_OVERRIDE.captura || acompGoalByKeyword(['captura','capta','cap']);
+  const gRmkt  = GOAL_OVERRIDE.rmkt    || acompGoalByKeyword(['remarket','rmkt','rmk','rmt']);
+  updateGoalCard('Total', investTotal, gTotal);
+  updateGoalCard('Cap',   investCap,   gCap);
+  updateGoalCard('Rmkt',  investRmkt,  gRmkt);
+  console.log('[a comunidade] Metas (acompanhamento): total $'+fmtN(gTotal)+' · captura $'+fmtN(gCap)+' · rmkt $'+fmtN(gRmkt));
 }
 // ═══ MÉTRICAS SECUNDÁRIAS ═══
 let BUBBLE_CHART=null, LINE_CHARTS={};
@@ -1108,8 +1094,8 @@ function render(){
   setText('kCPLPago',fmtM(cplPago));
   setText('kLeadsWpp',fmtN(leadsWpp));
   setText('kPctWpp',fmtP(pctWpp));
-  // Meta de gastos (acompanhamento) — valores da própria aba
-  renderMetas();
+  // Metas de gasto (acompanhamento) — % que falta para bater a meta, nos cards de investimento
+  renderGoals(investTotal, investCap, investRmkt);
   // Funil Meta Ads — usa somente campanhas de captura ("cap") cruzadas com leads pagos do CRM
   const metaCap=meta.filter(r=>isCapturaCampaign(r[COLS.metaCamp]));
   let impr=0, clicks=0, lpv=0;
@@ -1257,16 +1243,12 @@ function updateSortCarets(){
   });
 }
 // ═══ CRUZAMENTO: 3 tabelas — campanha × Campaign Name, público × Ad Set Name, criativo × Ad Name ═══
-// Cada tabela junta a Meta (investimento/impressões/cliques) com o CRM (contagem de leads)
-// pelo mesmo nome (campanha, público ou criativo) como chave.
 const escAttr=s=>String(s??'').replace(/"/g,'&quot;');
 const IG_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"/></svg>';
 window.dotbImgFail=function(el){ const s=document.createElement('span'); s.className='cr-noimg'; s.textContent='—'; el.replaceWith(s); };
 let CAMP_ROWS=[], CAMP_TOTALS=null, SORT_CAMP={key:'invest',dir:'desc'};
 let PUB_ROWS=[], PUB_TOTALS=null, SORT_PUB={key:'invest',dir:'desc'};
 let CRIA_ROWS=[], CRIA_TOTALS=null, SORT_CRIA={key:'invest',dir:'desc'};
-// Cruzamento adicional: e-mail do CRM × e-mail da pesquisa, para saber quantas respostas
-// de cada grupo (campanha/público/criativo) têm renda mensal acima de 1k.
 function buildEmailToRenda(pesquisa){
   const map={};
   pesquisa.forEach(r=>{
