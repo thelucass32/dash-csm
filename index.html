@@ -119,6 +119,24 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
 .badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:500;}
 .badge-caramel{background:var(--brand-caramel);color:var(--surface-dark);}
 .badge-green{background:rgba(18,182,15,.14);color:var(--accent-dark);}
+/* GOAL / META DE GASTOS */
+.goal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;}
+.goal-card{background:var(--surface);border:0.5px solid var(--divider);border-radius:var(--r-lg);padding:20px 20px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+.goal-lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);font-weight:500;}
+.goal-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:10px;}
+.goal-val{font-size:27px;font-weight:700;color:var(--title);line-height:1.05;}
+.goal-val .cur{font-size:13px;color:var(--text-muted);margin-right:2px;font-weight:400;}
+.goal-pct{font-size:15px;font-weight:700;}
+.goal-pct.ok{color:var(--accent-dark);}
+.goal-pct.mid{color:var(--brand-brown);}
+.goal-pct.over{color:var(--negative);}
+.goal-bar-track{margin-top:12px;height:12px;border-radius:20px;background:var(--surface-alt);border:0.5px solid var(--divider);overflow:hidden;}
+.goal-bar-fill{height:100%;border-radius:20px;transition:width .6s ease;min-width:4px;}
+.goal-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;}
+.goal-meta-lbl{font-size:11px;color:var(--text-muted);}
+.goal-meta-lbl b{color:var(--title);font-weight:700;}
+.goal-remaining{font-size:11px;color:var(--text-muted);font-weight:500;}
+.goal-remaining.done{color:var(--accent-dark);}
 /* CHART */
 .chart-card{background:var(--surface);border:0.5px solid var(--divider);border-radius:var(--r-lg);padding:22px 22px 14px;position:relative;box-shadow:var(--shadow);}
 .chart-legend{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:14px;}
@@ -131,10 +149,22 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
 .fs-btn svg{width:15px;height:15px;}
 [data-fs-card]:fullscreen{background:var(--bg);padding:36px 40px;display:flex;flex-direction:column;justify-content:center;overflow:auto;}
 [data-fs-card]:fullscreen .chart-canvas-wrap{height:calc(100vh - 140px);}
+[data-fs-card]:fullscreen .bubble-canvas-wrap{height:calc(100vh - 160px);}
 [data-fs-card]:fullscreen .tbl-scroll{max-height:calc(100vh - 200px)!important;}
 [data-fs-card]:-webkit-full-screen{background:var(--bg);padding:36px 40px;}
 [data-fs-card]:-webkit-full-screen .chart-canvas-wrap{height:calc(100vh - 140px);}
+[data-fs-card]:-webkit-full-screen .bubble-canvas-wrap{height:calc(100vh - 160px);}
 [data-fs-card]:-webkit-full-screen .tbl-scroll{max-height:calc(100vh - 200px)!important;}
+/* SECONDARY METRIC CHARTS */
+.sec-charts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;}
+.sec-chart-card{padding:18px 18px 12px;}
+.sec-chart-title{font-size:13px;font-weight:700;color:var(--title);margin-bottom:4px;}
+.sec-chart-sub{font-size:10.5px;color:var(--text-muted);margin-bottom:10px;}
+.sec-canvas-wrap{position:relative;width:100%;height:230px;}
+.sec-canvas-wrap canvas{width:100%!important;height:100%!important;}
+.bubble-canvas-wrap{position:relative;width:100%;height:420px;}
+.bubble-canvas-wrap canvas{width:100%!important;height:100%!important;}
+@media(max-width:760px){.sec-charts-grid{grid-template-columns:1fr;}}
 /* FUNNEL */
 .funnel-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
 .funnel-card{background:var(--surface);border:0.5px solid var(--divider);border-radius:var(--r-lg);padding:22px;box-shadow:var(--shadow);}
@@ -223,10 +253,12 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
 <nav class="subnav">
   <div class="subnav-inner">
     <a href="#kpis" class="active">KPIs</a>
+    <a href="#meta-sec">Meta de gastos</a>
     <a href="#captacao-sec">Captação</a>
     <a href="#pesquisa-sec">Pesquisa</a>
     <a href="#pesquisa-charts-sec">Respostas da pesquisa</a>
     <a href="#chart-sec">Evolução diária</a>
+    <a href="#sec-metrics-sec">Métricas secundárias</a>
     <a href="#funnel-sec">Funil de captação</a>
     <a href="#temperatura-sec">Temperatura</a>
     <a href="#daily-table-sec">Tabela diária</a>
@@ -277,7 +309,6 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
       </button>
     </div>
   </div>
-
   <!-- KPIs GERAIS -->
   <div class="section" id="kpis">
     <div class="section-head"><h2 class="section-title">Visão <em>geral</em></h2><span class="section-tag">Investimento &amp; leads · captura + rmkt</span></div>
@@ -290,7 +321,11 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
       <div class="kpi"><div class="kpi-lbl">Leads orgânicos</div><div class="kpi-val" id="kLeadsOrg">—</div><div class="kpi-sub">medium sem “paid”</div></div>
     </div>
   </div>
-
+  <!-- META DE GASTOS -->
+  <div class="section" id="meta-sec">
+    <div class="section-head"><h2 class="section-title">Meta de <em>gastos</em></h2><span class="section-tag">Aba acompanhamento · quanto falta para bater a meta</span></div>
+    <div class="goal-grid" id="metaGoals"><div class="empty-state">Carregando acompanhamento…</div></div>
+  </div>
   <!-- CAPTAÇÃO -->
   <div class="section" id="captacao-sec">
     <div class="section-head"><h2 class="section-title">Captação</h2><span class="section-tag">Custo por lead &amp; whatsapp</span></div>
@@ -301,7 +336,6 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
       <div class="kpi"><div class="kpi-lbl">% whatsapp</div><div class="kpi-val" id="kPctWpp">—</div><div class="kpi-sub">whatsapp ÷ leads geral</div></div>
     </div>
   </div>
-
   <!-- PESQUISA -->
   <div class="section" id="pesquisa-sec">
     <div class="section-head"><h2 class="section-title">Pesquisa de <em>boas-vindas</em></h2><span class="section-tag">Aba pesquisa</span></div>
@@ -312,7 +346,6 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
       <div class="kpi"><div class="kpi-lbl">% acima de 1k</div><div class="kpi-val" id="pPctAcima1k">—</div><div class="kpi-sub">acima de 1k ÷ total de respostas</div></div>
     </div>
   </div>
-
   <!-- PESQUISA · GRÁFICOS DE PIZZA -->
   <div class="section" id="pesquisa-charts-sec">
     <div class="section-head"><h2 class="section-title">Pesquisa <em>· respostas</em></h2><span class="section-tag">Distribuição por pergunta</span></div>
@@ -324,7 +357,6 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
       <div class="chart-card pie-card"><h3 class="pie-title">Investimento em saúde / bem-estar</h3><div class="pie-canvas-wrap"><canvas id="pieSaude"></canvas></div></div>
     </div>
   </div>
-
   <!-- CHART -->
   <div class="section" id="chart-sec">
     <div class="section-head"><h2 class="section-title">Evolução <em>diária</em></h2><span class="section-tag">Leads · custo · CPL</span></div>
@@ -340,7 +372,26 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
       <div class="chart-canvas-wrap"><canvas id="chartDaily"></canvas></div>
     </div>
   </div>
-
+  <!-- MÉTRICAS SECUNDÁRIAS -->
+  <div class="section" id="sec-metrics-sec">
+    <div class="section-head"><h2 class="section-title">Métricas <em>secundárias</em></h2><span class="section-tag">Análise de criativos · tendências diárias · campanhas “cap”</span></div>
+    <div class="subsection-lbl">Análise de anúncios · bolhas (leads × CPL)</div>
+    <div class="chart-card" id="bubbleCard" data-fs-card style="margin-bottom:20px;">
+      <button class="fs-btn" id="bubbleFsBtn" title="Tela cheia" aria-label="Tela cheia">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+      </button>
+      <h3 class="sec-chart-title">Análise Anúncios</h3>
+      <div class="sec-chart-sub">Cada bolha é um criativo · eixo X = leads · eixo Y = CPL · tamanho = leads</div>
+      <div class="bubble-canvas-wrap"><canvas id="bubbleCria"></canvas></div>
+    </div>
+    <div class="subsection-lbl">Tendências diárias por KPI</div>
+    <div class="sec-charts-grid">
+      <div class="chart-card sec-chart-card"><h3 class="sec-chart-title">% conversão de página</h3><div class="sec-chart-sub">leads pagos ÷ visualizações de página</div><div class="sec-canvas-wrap"><canvas id="lineConv"></canvas></div></div>
+      <div class="chart-card sec-chart-card"><h3 class="sec-chart-title">CTR</h3><div class="sec-chart-sub">cliques no link ÷ impressões</div><div class="sec-canvas-wrap"><canvas id="lineCTR"></canvas></div></div>
+      <div class="chart-card sec-chart-card"><h3 class="sec-chart-title">CPM</h3><div class="sec-chart-sub">custo por mil impressões</div><div class="sec-canvas-wrap"><canvas id="lineCPM"></canvas></div></div>
+      <div class="chart-card sec-chart-card"><h3 class="sec-chart-title">Connect rate</h3><div class="sec-chart-sub">visualizações de página ÷ cliques no link</div><div class="sec-canvas-wrap"><canvas id="lineConn"></canvas></div></div>
+    </div>
+  </div>
   <!-- FUNIL -->
   <div class="section" id="funnel-sec">
     <div class="section-head"><h2 class="section-title">Funil de <em>captação</em></h2><span class="section-tag">Campanhas com “cap” · cruzamento meta × crm</span></div>
@@ -375,7 +426,6 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
       </div>
     </div>
   </div>
-
   <!-- TEMPERATURA -->
   <div class="section" id="temperatura-sec">
     <div class="section-head"><h2 class="section-title">Métricas por <em>temperatura</em></h2><span class="section-tag">Campanha contém “quente” ou “frio”</span></div>
@@ -398,7 +448,6 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
       </div>
     </div>
   </div>
-
   <!-- DAILY TABLE -->
   <div class="section" id="daily-table-sec">
     <div class="section-head"><h2 class="section-title">Leads <em>× CPL × custo</em></h2><span class="section-tag">Por dia · clique no cabeçalho para ordenar</span></div>
@@ -423,11 +472,9 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
       </div>
     </div>
   </div>
-
   <!-- CRUZAMENTO: 3 TABELAS SEPARADAS (campanha / público / criativo) -->
   <div class="section" id="cruzamento-sec">
     <div class="section-head"><h2 class="section-title">Cruzamento <em>meta × crm</em></h2><span class="section-tag">Campanhas “acoc”+“cap” · renda cruzada por e-mail com a pesquisa · clique no cabeçalho para ordenar</span></div>
-
     <div class="subsection-lbl">Por campanha</div>
     <div class="tbl-card" id="tblCampCard" data-fs-card>
       <button class="fs-btn" id="tblCampFsBtn" title="Tela cheia" aria-label="Tela cheia">
@@ -451,7 +498,6 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
         </table>
       </div>
     </div>
-
     <div class="subsection-lbl">Por público</div>
     <div class="tbl-card" id="tblPubCard" data-fs-card>
       <button class="fs-btn" id="tblPubFsBtn" title="Tela cheia" aria-label="Tela cheia">
@@ -475,7 +521,6 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
         </table>
       </div>
     </div>
-
     <div class="subsection-lbl">Por criativo</div>
     <div class="tbl-card" id="tblCriaCard" data-fs-card>
       <button class="fs-btn" id="tblCriaFsBtn" title="Tela cheia" aria-label="Tela cheia">
@@ -511,16 +556,16 @@ const URLS = {
   meta:   'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8G-glBbuXTjMwVdWWdY5dFd0jviPmpPIEC-nTyjlIipevft5Et_ieY0hJSacMiauoM9RQBWx08ZV0/pub?gid=0&single=true&output=csv',
   grupos: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8G-glBbuXTjMwVdWWdY5dFd0jviPmpPIEC-nTyjlIipevft5Et_ieY0hJSacMiauoM9RQBWx08ZV0/pub?gid=1999287374&single=true&output=csv',
   crm:    'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8G-glBbuXTjMwVdWWdY5dFd0jviPmpPIEC-nTyjlIipevft5Et_ieY0hJSacMiauoM9RQBWx08ZV0/pub?gid=1820178885&single=true&output=csv',
-  pesquisa: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8G-glBbuXTjMwVdWWdY5dFd0jviPmpPIEC-nTyjlIipevft5Et_ieY0hJSacMiauoM9RQBWx08ZV0/pub?gid=745079856&single=true&output=csv'
+  pesquisa: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8G-glBbuXTjMwVdWWdY5dFd0jviPmpPIEC-nTyjlIipevft5Et_ieY0hJSacMiauoM9RQBWx08ZV0/pub?gid=745079856&single=true&output=csv',
+  acomp:  'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8G-glBbuXTjMwVdWWdY5dFd0jviPmpPIEC-nTyjlIipevft5Et_ieY0hJSacMiauoM9RQBWx08ZV0/pub?gid=856769141&single=true&output=csv'
 };
-let RAW={meta:[],grupos:[],crm:[],pesquisa:[]};
+let RAW={meta:[],grupos:[],crm:[],pesquisa:[],acomp:[]};
 let COLS={};
 let DATE_MIN='', DATE_MAX='';
 let DP={viewDate:null,draftFrom:'',draftTo:'',draftPreset:'all'};
 let chartInstance=null;
 let DAILY_ROWS=[], DAILY_TOTALS=null;
 let SORT={key:'day',dir:'desc'};
-
 // ═══ CSV PARSE ═══
 function parseCSV(text){
   const rows=[]; let row=[],cur='',inQ=false;
@@ -544,7 +589,6 @@ function cleanRows(rows,label){
   console.log('[a comunidade] '+label+': '+valid.length+' linhas válidas');
   return valid;
 }
-
 // ═══ FETCH GOOGLE SHEETS (CSV publicado, com fallback de proxy + GViz) ═══
 const PROXIES=[
   u=>u,
@@ -606,7 +650,6 @@ function fetchCSVViaGviz(url){
   }));
   return GVIZ_CHAIN;
 }
-
 // ═══ HELPERS ═══
 const fmtN=n=>new Intl.NumberFormat('pt-BR').format(Math.round(n||0));
 const fmtM=n=>new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(n||0);
@@ -656,7 +699,6 @@ function asLocalDate(iso){ if(!iso) return null; const [y,m,d]=String(iso).split
 function addMonthsLocal(d,n){ const c=new Date(d.getFullYear(),d.getMonth(),d.getDate()); const day=c.getDate(); c.setMonth(c.getMonth()+n); if(c.getDate()<day) c.setDate(0); return c; }
 function fmtDateBR(iso){ const d=asLocalDate(iso); return d?d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit'}):''; }
 function monthNamePT(d){ return d.toLocaleDateString('pt-BR',{month:'long'}).replace(/^./,c=>c.toUpperCase()); }
-
 // ═══ DETECT COLUMNS ═══
 function colFind(headers,patterns){
   if(!headers||!headers.length) return null;
@@ -692,21 +734,33 @@ function detectColumns(){
   COLS.pesqProfissional= colFind(qh,[/profissional/]);
   COLS.pesqRenda       = colFind(qh,[/rendimento/]);
   COLS.pesqSaude       = colFind(qh,[/sa[uú]de/,/bem.?estar/]);
+  // ── Aba acompanhamento (meta de gastos) ──
+  const ah=RAW.acomp[0]?Object.keys(RAW.acomp[0]):[];
+  COLS.acompLabel = colFind(ah,[/campanha/,/nome/,/descri/,/^item$/,/categoria/,/tipo/,/indicador/,/^conta$/]) || ah[0] || null;
+  COLS.acompMeta  = colFind(ah,[/meta/,/objetivo/,/goal/,/planejad/,/previst/,/or[çc]ament/,/target/,/limite/,/teto/]);
+  COLS.acompReal  = colFind(ah,[/realizad/,/\bgast/,/investid/,/usado/,/atual/,/spent/,/acumulad/,/^valor$/,/executad/]);
+  // Fallback: usa as colunas numéricas (excluindo a de rótulo) se algum padrão não bater
+  if(!COLS.acompReal || !COLS.acompMeta || COLS.acompReal===COLS.acompMeta){
+    const numCols=ah.filter(h=>h!==COLS.acompLabel && RAW.acomp.some(r=>toNum(r[h])>0));
+    if(!COLS.acompReal || COLS.acompReal===COLS.acompMeta) COLS.acompReal=numCols[0]||COLS.acompReal||null;
+    if(!COLS.acompMeta || COLS.acompMeta===COLS.acompReal) COLS.acompMeta=numCols.find(c=>c!==COLS.acompReal)||numCols[1]||COLS.acompMeta||null;
+  }
   console.log('%c[a comunidade] Colunas detectadas:','color:#12B60F;font-weight:bold',COLS);
   console.log('[a comunidade] Cabeçalhos meta:',mh);
   console.log('[a comunidade] Cabeçalhos crm:',ch);
   console.log('[a comunidade] Cabeçalhos grupos:',gh);
+  console.log('[a comunidade] Cabeçalhos acompanhamento:',ah);
 }
-
 // ═══ LOAD ═══
 async function loadData(){
   setStatus('loading','Carregando dados…');
   try{
-    const [m,g,c,q]=await Promise.all([fetchCSV(URLS.meta),fetchCSV(URLS.grupos),fetchCSV(URLS.crm),fetchCSV(URLS.pesquisa)]);
+    const [m,g,c,q,a]=await Promise.all([fetchCSV(URLS.meta),fetchCSV(URLS.grupos),fetchCSV(URLS.crm),fetchCSV(URLS.pesquisa),fetchCSV(URLS.acomp)]);
     RAW.meta=cleanRows(csvToObjects(m),'Meta');
     RAW.grupos=cleanRows(csvToObjects(g),'Grupos (whatsapp)');
     RAW.crm=cleanRows(csvToObjects(c),'CRM');
     RAW.pesquisa=cleanRows(csvToObjects(q),'Pesquisa');
+    RAW.acomp=cleanRows(csvToObjects(a),'Acompanhamento');
     detectColumns();
     setStatus('ok','Ao vivo · '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
     setText('refStatus','Atualizado às '+new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}));
@@ -723,7 +777,6 @@ function setStatus(type,txt){
   pill.className='live-pill'+(type==='loading'?' loading':type==='error'?' error':'');
   setText('liveTxt',txt);
 }
-
 // ═══ DATE BOUNDS / PICKER ═══
 function computeDateBounds(){
   const all=[];
@@ -813,7 +866,6 @@ function initDatePicker(){
     render();
   });
 }
-
 // ═══ FILTERS ═══
 function getRange(){
   return { from:document.getElementById('dateFrom').value||DATE_MIN, to:document.getElementById('dateTo').value||DATE_MAX };
@@ -904,7 +956,127 @@ function renderPesquisaCharts(rows){
   renderPieFor('pieRenda',rows,COLS.pesqRenda);
   renderPieFor('pieSaude',rows,COLS.pesqSaude);
 }
-
+// ═══ META DE GASTOS (aba acompanhamento) ═══
+function renderMetas(){
+  const wrap=document.getElementById('metaGoals'); if(!wrap) return;
+  if(!RAW.acomp.length || !COLS.acompMeta){
+    wrap.innerHTML='<div class="empty-state">Sem dados de acompanhamento — confira os cabeçalhos da aba (esperado: rótulo + realizado + meta).</div>';
+    return;
+  }
+  const rows=RAW.acomp.filter(r=>{
+    const lbl=String(r[COLS.acompLabel]||'').trim();
+    return lbl && (toNum(r[COLS.acompMeta])>0 || toNum(r[COLS.acompReal])>0);
+  });
+  if(!rows.length){ wrap.innerHTML='<div class="empty-state">Sem metas cadastradas na aba acompanhamento.</div>'; return; }
+  wrap.innerHTML=rows.map(r=>{
+    const lbl=String(r[COLS.acompLabel]||'—');
+    const real=toNum(r[COLS.acompReal]);
+    const goal=toNum(r[COLS.acompMeta]);
+    const pct=goal>0? real/goal : 0;
+    const w=Math.max(2,Math.min(100,Math.round(pct*100)));
+    const remaining=goal-real;
+    const over=real>goal;
+    const cls = over?'over': pct>=0.9?'ok':'mid';
+    const fill = over?'var(--negative)': pct>=0.9?'var(--accent)': pct>=0.5?'#C49C84':'#8A604D';
+    const footRight = over
+      ? '<span class="goal-remaining done">meta batida · +$ '+fmtN(Math.abs(remaining))+'</span>'
+      : '<span class="goal-remaining">faltam $ '+fmtN(Math.max(0,remaining))+'</span>';
+    const pctTxt=(pct*100>=10?(pct*100).toFixed(0):(pct*100).toFixed(1)).replace('.',',');
+    return '<div class="goal-card">'
+      + '<div class="goal-lbl">'+lbl+'</div>'
+      + '<div class="goal-top"><div class="goal-val"><span class="cur">$</span>'+fmtN(real)+'</div><div class="goal-pct '+cls+'">'+pctTxt+'%</div></div>'
+      + '<div class="goal-bar-track"><div class="goal-bar-fill" style="width:'+w+'%;background:'+fill+';"></div></div>'
+      + '<div class="goal-foot"><span class="goal-meta-lbl">meta <b>$ '+fmtN(goal)+'</b></span>'+footRight+'</div>'
+      + '</div>';
+  }).join('');
+}
+// ═══ MÉTRICAS SECUNDÁRIAS ═══
+let BUBBLE_CHART=null, LINE_CHARTS={};
+const BUBBLE_PALETTE=['#12B60F','#8A604D','#C49C84','#E91E8C','#F39C12','#8E44AD','#5B2C6F','#2E86C1','#34495E','#E74C3C','#7F8C8D','#16A085','#27AE60','#2980B9','#D35400','#C0392B','#1ABC9C','#9B59B6','#F1C40F','#3498DB','#E67E22','#95A5A6','#22C1DC','#AF7AC5','#48C9B0','#EB984E'];
+function renderBubbleCria(){
+  const canvas=document.getElementById('bubbleCria'); if(!canvas) return;
+  const wrap=canvas.closest('.bubble-canvas-wrap');
+  const rows=(CRIA_ROWS||[]).filter(r=>r.leads>0 && r.cpl>0);
+  if(BUBBLE_CHART){ BUBBLE_CHART.destroy(); BUBBLE_CHART=null; }
+  if(!rows.length){ if(wrap) wrap.innerHTML='<div class="empty-state">Sem criativos com leads no período selecionado</div>'; return; }
+  if(wrap && !wrap.querySelector('canvas')){ wrap.innerHTML='<canvas id="bubbleCria"></canvas>'; }
+  const fresh=document.getElementById('bubbleCria');
+  const maxLeads=Math.max(...rows.map(r=>r.leads),1);
+  const radius=n=>6+38*Math.sqrt((n||0)/maxLeads);
+  const datasets=rows.map((r,i)=>{
+    const col=BUBBLE_PALETTE[i%BUBBLE_PALETTE.length];
+    return {label:r.nome||('criativo '+(i+1)),data:[{x:r.leads,y:r.cpl,r:radius(r.leads),_invest:r.invest}],backgroundColor:col+'CC',borderColor:col,borderWidth:1};
+  });
+  BUBBLE_CHART=new Chart(fresh.getContext('2d'),{
+    type:'bubble',
+    data:{datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{position:'top',labels:{color:'#3E3E3E',font:{size:10,family:'Sora'},boxWidth:9,padding:7,usePointStyle:true}},
+        tooltip:{backgroundColor:'#27160E',titleColor:'#FFF3E6',bodyColor:'#F3E4DA',padding:10,callbacks:{
+          title:items=>items[0].dataset.label,
+          label:c=>{ const d=c.raw; return [' Leads: '+fmtN(d.x),' CPL: $ '+fmtM(d.y),' Investimento: $ '+fmtN(d._invest)]; }
+        }}
+      },
+      scales:{
+        x:{title:{display:true,text:'Leads',color:'#8A604D',font:{size:11,family:'Sora'}},grid:{color:'#E9DCCF'},ticks:{color:'#8A604D',font:{size:9,family:'Sora'},callback:v=>fmtN(v)},beginAtZero:true},
+        y:{title:{display:true,text:'CPL ($)',color:'#8A604D',font:{size:11,family:'Sora'}},grid:{color:'#E9DCCF'},ticks:{color:'#8A604D',font:{size:9,family:'Sora'},callback:v=>'$'+fmtN(v)},beginAtZero:true}
+      }
+    }
+  });
+}
+function drawLineKPI(canvasId,days,values,kind,color){
+  const canvas=document.getElementById(canvasId); if(!canvas) return;
+  const wrap=canvas.closest('.sec-canvas-wrap');
+  if(LINE_CHARTS[canvasId]){ LINE_CHARTS[canvasId].destroy(); delete LINE_CHARTS[canvasId]; }
+  if(!days.length){ if(wrap) wrap.innerHTML='<div class="empty-state">Sem dados no período</div>'; return; }
+  if(wrap && !wrap.querySelector('canvas')){ wrap.innerHTML='<canvas id="'+canvasId+'"></canvas>'; }
+  const fresh=document.getElementById(canvasId);
+  const fmtVal = kind==='pct' ? (v=>fmtP(v)) : (v=>'$ '+fmtM(v));
+  const yTick  = kind==='pct' ? (v=>(v*100).toFixed(0)+'%') : (v=>'$'+fmtN(v));
+  LINE_CHARTS[canvasId]=new Chart(fresh.getContext('2d'),{
+    type:'line',
+    data:{labels:days,datasets:[{label:canvasId,data:values,borderColor:color,backgroundColor:color+'22',borderWidth:2,tension:.3,pointRadius:2,pointHoverRadius:4,fill:true}]},
+    options:{
+      responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'#27160E',titleColor:'#FFF3E6',bodyColor:'#F3E4DA',padding:9,callbacks:{
+        title:items=>fmtDateBR(items[0].label),
+        label:c=>' '+fmtVal(c.raw)
+      }}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#8A604D',font:{size:8,family:'Sora'},maxRotation:0,autoSkip:true,maxTicksLimit:8,callback:function(v){ return fmtDateBR(this.getLabelForValue(v)); }}},
+        y:{grid:{color:'#E9DCCF'},ticks:{color:'#8A604D',font:{size:9,family:'Sora'},callback:yTick},beginAtZero:true}
+      }
+    }
+  });
+}
+function renderSecondaryCharts(meta,crm){
+  // Usa campanhas de captura ("cap") para alinhar com o funil de captação
+  const metaCap=meta.filter(r=>isCapturaCampaign(r[COLS.metaCamp]));
+  const byDay={};
+  metaCap.forEach(r=>{
+    const d=isoFromMetaDay(r[COLS.metaDay]); if(!d) return;
+    const o=byDay[d]=byDay[d]||{impr:0,clicks:0,lpv:0,spend:0,leads:0};
+    o.impr+=toNum(r[COLS.metaImpr]); o.clicks+=toNum(r[COLS.metaClicks]);
+    o.lpv+=toNum(r[COLS.metaLPV]); o.spend+=toNum(r[COLS.metaSpend]);
+  });
+  crm.forEach(r=>{
+    if(!isPaidMedium(r[COLS.crmMedium])) return;
+    const d=isoFromCrmData(r[COLS.crmData]); if(!d) return;
+    const o=byDay[d]=byDay[d]||{impr:0,clicks:0,lpv:0,spend:0,leads:0};
+    o.leads+=1;
+  });
+  const days=Object.keys(byDay).sort();
+  const conv=days.map(d=>byDay[d].lpv>0? byDay[d].leads/byDay[d].lpv : 0);
+  const ctr =days.map(d=>byDay[d].impr>0? byDay[d].clicks/byDay[d].impr : 0);
+  const cpm =days.map(d=>byDay[d].impr>0? byDay[d].spend/byDay[d].impr*1000 : 0);
+  const conn=days.map(d=>byDay[d].clicks>0? byDay[d].lpv/byDay[d].clicks : 0);
+  drawLineKPI('lineConv',days,conv,'pct','#12B60F');
+  drawLineKPI('lineCTR', days,ctr, 'pct','#8A604D');
+  drawLineKPI('lineCPM', days,cpm, 'money','#C49C84');
+  drawLineKPI('lineConn',days,conn,'pct','#27160E');
+}
 // ═══ RENDER ═══
 function render(){
   if(!RAW.meta.length && !RAW.crm.length) return;
@@ -912,25 +1084,20 @@ function render(){
   const meta=filterMeta(f);
   const crm=filterCrm(f);
   const pesquisa=filterPesquisa(f);
-
   // Investimento
   let investCap=0, investRmkt=0;
   meta.forEach(r=>{ const sp=toNum(r[COLS.metaSpend]); if(isCapturaCampaign(r[COLS.metaCamp])) investCap+=sp; else investRmkt+=sp; });
   const investTotal=investCap+investRmkt;
-
   // Leads (crm)
   let leadsPagos=0, leadsOrg=0;
   crm.forEach(r=>{ if(isPaidMedium(r[COLS.crmMedium])) leadsPagos++; else leadsOrg++; });
   const leadsGeral=leadsPagos+leadsOrg;
-
   // Whatsapp (aba grupos — soma total, sem filtro de data pois a coluna "data" da aba não é confiável)
   let leadsWpp=0;
   RAW.grupos.forEach(r=>{ leadsWpp+=toNum(r[COLS.grupoTotal]); });
   const pctWpp=leadsGeral>0?leadsWpp/leadsGeral:0;
-
   const cplGeral=leadsGeral>0?investTotal/leadsGeral:0;
   const cplPago=leadsPagos>0?investCap/leadsPagos:0;
-
   setText('kInvestTotal',fmtN(investTotal));
   setText('kInvestCap',fmtN(investCap));
   setText('kInvestRmkt',fmtN(investRmkt));
@@ -941,7 +1108,8 @@ function render(){
   setText('kCPLPago',fmtM(cplPago));
   setText('kLeadsWpp',fmtN(leadsWpp));
   setText('kPctWpp',fmtP(pctWpp));
-
+  // Meta de gastos (acompanhamento) — valores da própria aba
+  renderMetas();
   // Funil Meta Ads — usa somente campanhas de captura ("cap") cruzadas com leads pagos do CRM
   const metaCap=meta.filter(r=>isCapturaCampaign(r[COLS.metaCamp]));
   let impr=0, clicks=0, lpv=0;
@@ -965,7 +1133,6 @@ function render(){
     {lbl:'Cliques',n:0,color:'#D9B9A9'},
     {lbl:'Leads',n:0,color:'#D9B9A9'}
   ],true);
-
   // Temperatura — classifica pelo nome da campanha (contém "quente" ou "frio")
   let tqInvest=0, tqLeads=0, tfInvest=0, tfLeads=0;
   meta.forEach(r=>{ const sp=toNum(r[COLS.metaSpend]); if(isQuenteCampaign(r[COLS.metaCamp])) tqInvest+=sp; else if(isFrioCampaign(r[COLS.metaCamp])) tfInvest+=sp; });
@@ -976,7 +1143,6 @@ function render(){
   setText('tFrioInvest','$ '+fmtN(tfInvest));
   setText('tFrioCPL','$ '+fmtM(tfLeads>0?tfInvest/tfLeads:0));
   setText('tFrioLeads',fmtN(tfLeads));
-
   // Pesquisa de boas-vindas
   const respondentes=pesquisa.length;
   const pctRespondidas=leadsGeral>0?respondentes/leadsGeral:0;
@@ -988,19 +1154,19 @@ function render(){
   setText('pRendaAcima1k',fmtN(rendaAcima1k));
   setText('pPctAcima1k',fmtP(pctAcima1k));
   renderPesquisaCharts(pesquisa);
-
   renderChart(meta,crm);
   renderDailyTable(meta,crm,investCap,leadsPagos);
   renderCampTable(meta,crm,pesquisa);
   renderPubTable(meta,crm,pesquisa);
   renderCriaTable(meta,crm,pesquisa);
-
+  // Métricas secundárias (dependem de CRIA_ROWS já calculado acima)
+  renderBubbleCria();
+  renderSecondaryCharts(meta,crm);
   console.log('%c[a comunidade] RENDER ('+f.from+' → '+f.to+')','color:#12B60F;font-weight:bold');
   console.log('  Investimento total: $ '+fmtN(investTotal)+' (captura $ '+fmtN(investCap)+' + rmkt $ '+fmtN(investRmkt)+')');
   console.log('  Leads geral: '+leadsGeral+' (pagos '+leadsPagos+' + org '+leadsOrg+')');
   console.log('  Leads whatsapp (aba grupos, total geral): '+leadsWpp);
 }
-
 function renderFunnelBars(containerId,stages,empty){
   const wrap=document.getElementById(containerId);
   const max=Math.max(1,...stages.map(s=>s.n));
@@ -1010,7 +1176,6 @@ function renderFunnelBars(containerId,stages,empty){
     return (i>0?rateHtml:'')+'<div class="fbar-row"><div class="fbar-lbl-side">'+s.lbl+'</div><div class="fbar-track"><div class="fbar-fill" style="width:'+w+'%;background:'+(empty?'var(--divider)':s.color)+';"></div></div><div class="fbar-num">'+(empty?'—':fmtN(s.n))+'</div></div>';
   }).join('');
 }
-
 function renderChart(meta,crm){
   const byDay={};
   meta.forEach(r=>{ const d=isoFromMetaDay(r[COLS.metaDay]); if(!d) return; (byDay[d]=byDay[d]||{custo:0,leads:0}).custo+=toNum(r[COLS.metaSpend]); });
@@ -1043,7 +1208,6 @@ function renderChart(meta,crm){
     }
   });
 }
-
 function renderDailyTable(meta,crm,investCapTotal,leadsPagosTotal){
   const byDay={};
   meta.forEach(r=>{
@@ -1092,7 +1256,6 @@ function updateSortCarets(){
     const car=th.querySelector('.sort-caret'); if(car) car.textContent=active?(SORT.dir==='asc'?'▲':'▼'):'';
   });
 }
-
 // ═══ CRUZAMENTO: 3 tabelas — campanha × Campaign Name, público × Ad Set Name, criativo × Ad Name ═══
 // Cada tabela junta a Meta (investimento/impressões/cliques) com o CRM (contagem de leads)
 // pelo mesmo nome (campanha, público ou criativo) como chave.
@@ -1205,7 +1368,6 @@ function paintCriaTable(){
   foot.innerHTML='<tr><td></td><td>Total</td><td>$ '+fmtN(t.invest)+'</td><td>'+fmtN(t.impr)+'</td><td>'+fmtN(t.clicks)+'</td><td>'+fmtP(t.ctr)+'</td><td>'+fmtN(t.leads)+'</td><td>$ '+fmtM(t.cpl)+'</td><td>'+fmtN(t.rendaAcima1k)+'</td><td>'+fmtP(t.pctAcima1k)+'</td><td></td></tr>';
   updateSortCaretsFor('tblCriaTable',SORT_CRIA);
 }
-
 // ═══ FULLSCREEN TOGGLES ═══
 function initFullscreen(btnId,cardId){
   const btn=document.getElementById(btnId), card=document.getElementById(cardId);
@@ -1222,11 +1384,11 @@ function initFullscreen(btnId,cardId){
     btn.innerHTML=inFs?ICON_COMPRESS:ICON_EXPAND;
     btn.title=inFs?'Sair da tela cheia':'Tela cheia';
     if(chartInstance && cardId==='chartCard') setTimeout(()=>chartInstance.resize(),80);
+    if(BUBBLE_CHART && cardId==='bubbleCard') setTimeout(()=>BUBBLE_CHART.resize(),80);
   };
   document.addEventListener('fullscreenchange',onFsChange);
   document.addEventListener('webkitfullscreenchange',onFsChange);
 }
-
 // ═══ SUBNAV SCROLLSPY ═══
 function initSubnav(){
   const links=[...document.querySelectorAll('.subnav a')];
@@ -1241,7 +1403,6 @@ function initSubnav(){
   },{rootMargin:'-140px 0px -70% 0px'});
   sections.forEach(s=>obs.observe(s));
 }
-
 // ═══ EVENTS / BOOT ═══
 function initEvents(){
   document.getElementById('btnRefresh').addEventListener('click',async()=>{
@@ -1260,6 +1421,7 @@ function initEvents(){
   initSortable('tblPubTable',SORT_PUB,paintPubTable);
   initSortable('tblCriaTable',SORT_CRIA,paintCriaTable);
   initFullscreen('chartFsBtn','chartCard');
+  initFullscreen('bubbleFsBtn','bubbleCard');
   initFullscreen('tblFsBtn','tblCard');
   initFullscreen('tblCampFsBtn','tblCampCard');
   initFullscreen('tblPubFsBtn','tblPubCard');
