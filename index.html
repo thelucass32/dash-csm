@@ -336,7 +336,7 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
       </button>
       <div class="chart-legend">
-        <div class="legend-item"><div class="legend-dot" style="background:#8A604D"></div>Custo total</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#8A604D"></div>Custo campanhas “cap”</div>
         <div class="legend-item"><div class="legend-dot" style="background:#12B60F"></div>Leads totais</div>
         <div class="legend-item"><div class="legend-dot" style="background:#27160E"></div>CPL geral (eixo dir.)</div>
       </div>
@@ -354,7 +354,7 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
         <table class="tbl">
           <thead><tr>
             <th data-sort="day">Dia <span class="sort-caret"></span></th>
-            <th data-sort="custo">Custo total <span class="sort-caret"></span></th>
+            <th data-sort="custo">Custo campanhas “cap” <span class="sort-caret"></span></th>
             <th data-sort="leadsGeral">Leads totais <span class="sort-caret"></span></th>
             <th data-sort="leadsPagos">Leads pagos <span class="sort-caret"></span></th>
             <th data-sort="leadsOrg">Leads org <span class="sort-caret"></span></th>
@@ -1078,9 +1078,9 @@ function render(){
   let leadsPagos=0, leadsOrg=0;
   crm.forEach(r=>{ if(isPaidMedium(r[COLS.crmMedium])) leadsPagos++; else leadsOrg++; });
   const leadsGeral=leadsPagos+leadsOrg;
-  // Whatsapp (aba grupos — soma total, sem filtro de data pois a coluna "data" da aba não é confiável)
+  // Whatsapp (aba grupos — usa o maior total informado; não soma linhas acumuladas)
   let leadsWpp=0;
-  RAW.grupos.forEach(r=>{ leadsWpp+=toNum(r[COLS.grupoTotal]); });
+  RAW.grupos.forEach(r=>{ leadsWpp=Math.max(leadsWpp,toNum(r[COLS.grupoTotal])); });
   const pctWpp=leadsGeral>0?leadsWpp/leadsGeral:0;
   const cplGeral=leadsGeral>0?investTotal/leadsGeral:0;
   const cplPago=leadsPagos>0?investCap/leadsPagos:0;
@@ -1151,7 +1151,7 @@ function render(){
   console.log('%c[a comunidade] RENDER ('+f.from+' → '+f.to+')','color:#12B60F;font-weight:bold');
   console.log('  Investimento total: $ '+fmtN(investTotal)+' (captura $ '+fmtN(investCap)+' + rmkt $ '+fmtN(investRmkt)+')');
   console.log('  Leads geral: '+leadsGeral+' (pagos '+leadsPagos+' + org '+leadsOrg+')');
-  console.log('  Leads whatsapp (aba grupos, total geral): '+leadsWpp);
+  console.log('  Leads whatsapp (aba grupos, maior total informado): '+leadsWpp);
 }
 function renderFunnelBars(containerId,stages,empty){
   const wrap=document.getElementById(containerId);
@@ -1164,7 +1164,11 @@ function renderFunnelBars(containerId,stages,empty){
 }
 function renderChart(meta,crm){
   const byDay={};
-  meta.forEach(r=>{ const d=isoFromMetaDay(r[COLS.metaDay]); if(!d) return; (byDay[d]=byDay[d]||{custo:0,leads:0}).custo+=toNum(r[COLS.metaSpend]); });
+  meta.forEach(r=>{
+    if(!isCapturaCampaign(r[COLS.metaCamp])) return;
+    const d=isoFromMetaDay(r[COLS.metaDay]); if(!d) return;
+    (byDay[d]=byDay[d]||{custo:0,leads:0}).custo+=toNum(r[COLS.metaSpend]);
+  });
   crm.forEach(r=>{ const d=isoFromCrmData(r[COLS.crmData]); if(!d) return; (byDay[d]=byDay[d]||{custo:0,leads:0}).leads+=1; });
   const days=Object.keys(byDay).sort();
   const custo=days.map(d=>byDay[d].custo||0);
@@ -1174,7 +1178,7 @@ function renderChart(meta,crm){
   if(chartInstance) chartInstance.destroy();
   chartInstance=new Chart(ctx,{
     data:{labels:days,datasets:[
-      {type:'bar',label:'Custo total',data:custo,backgroundColor:'#8A604D',borderRadius:3,yAxisID:'y'},
+      {type:'bar',label:'Custo campanhas cap',data:custo,backgroundColor:'#8A604D',borderRadius:3,yAxisID:'y'},
       {type:'bar',label:'Leads totais',data:leads,backgroundColor:'#12B60F',borderRadius:3,yAxisID:'y1'},
       {type:'line',label:'CPL geral',data:cpl,borderColor:'#27160E',borderWidth:2,tension:.3,pointRadius:2,borderDash:[4,3],yAxisID:'y2',fill:false}
     ]},
@@ -1183,7 +1187,7 @@ function renderChart(meta,crm){
       plugins:{legend:{display:false},tooltip:{backgroundColor:'#27160E',borderColor:'#8A604D',borderWidth:1,titleColor:'#FFF3E6',bodyColor:'#F3E4DA',padding:10,callbacks:{label:c=>{
         if(c.dataset.label==='CPL geral') return ' CPL geral: $ '+fmtM(c.raw);
         if(c.dataset.label==='Leads totais') return ' Leads totais: '+fmtN(c.raw);
-        return ' Custo total: $ '+fmtN(c.raw);
+        return ' Custo campanhas cap: $ '+fmtN(c.raw);
       }}}},
       scales:{
         x:{grid:{color:'#D9B9A9',display:false},ticks:{color:'#8A604D',font:{size:9,family:'Sora'},maxRotation:0,autoSkip:true,maxTicksLimit:10}},
@@ -1197,15 +1201,14 @@ function renderChart(meta,crm){
 function renderDailyTable(meta,crm,investCapTotal,leadsPagosTotal){
   const byDay={};
   meta.forEach(r=>{
+    if(!isCapturaCampaign(r[COLS.metaCamp])) return;
     const d=isoFromMetaDay(r[COLS.metaDay]); if(!d) return;
-    const day=byDay[d]=byDay[d]||{day:d,custo:0,custoCap:0,leadsGeral:0,leadsPagos:0,leadsOrg:0};
-    const sp=toNum(r[COLS.metaSpend]);
-    day.custo+=sp;
-    if(isCapturaCampaign(r[COLS.metaCamp])) day.custoCap+=sp;
+    const day=byDay[d]=byDay[d]||{day:d,custo:0,leadsGeral:0,leadsPagos:0,leadsOrg:0};
+    day.custo+=toNum(r[COLS.metaSpend]);
   });
   crm.forEach(r=>{
     const d=isoFromCrmData(r[COLS.crmData]); if(!d) return;
-    const day=byDay[d]=byDay[d]||{day:d,custo:0,custoCap:0,leadsGeral:0,leadsPagos:0,leadsOrg:0};
+    const day=byDay[d]=byDay[d]||{day:d,custo:0,leadsGeral:0,leadsPagos:0,leadsOrg:0};
     if(isPaidMedium(r[COLS.crmMedium])){ day.leadsPagos++; } else { day.leadsOrg++; }
     day.leadsGeral++;
   });
@@ -1216,7 +1219,7 @@ function renderDailyTable(meta,crm,investCapTotal,leadsPagosTotal){
     leadsPagos:d.leadsPagos,
     leadsOrg:d.leadsOrg,
     cplGeral:d.leadsGeral>0?d.custo/d.leadsGeral:0,
-    cplPago:d.leadsPagos>0?d.custoCap/d.leadsPagos:0
+    cplPago:d.leadsPagos>0?d.custo/d.leadsPagos:0
   }));
   let tC=0,tG=0,tP=0,tO=0;
   DAILY_ROWS.forEach(r=>{ tC+=r.custo; tG+=r.leadsGeral; tP+=r.leadsPagos; tO+=r.leadsOrg; });
