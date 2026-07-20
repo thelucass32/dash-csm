@@ -303,7 +303,7 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
       <div class="kpi"><div class="kpi-lbl">Investimento total</div><div class="kpi-val"><span class="cur">$</span><span id="kInvestTotal">—</span></div><div class="kpi-goal"><div class="kpi-goal-track"><div class="kpi-goal-fill" id="kGoalTotalFill"></div></div><div class="kpi-goal-txt" id="kGoalTotalTxt">—</div></div></div>
       <div class="kpi"><div class="kpi-lbl">Investimento captura</div><div class="kpi-val"><span class="cur">$</span><span id="kInvestCap">—</span></div><div class="kpi-goal"><div class="kpi-goal-track"><div class="kpi-goal-fill" id="kGoalCapFill"></div></div><div class="kpi-goal-txt" id="kGoalCapTxt">—</div></div></div>
       <div class="kpi"><div class="kpi-lbl">Investimento rmkt</div><div class="kpi-val"><span class="cur">$</span><span id="kInvestRmkt">—</span></div><div class="kpi-goal"><div class="kpi-goal-track"><div class="kpi-goal-fill" id="kGoalRmktFill"></div></div><div class="kpi-goal-txt" id="kGoalRmktTxt">—</div></div></div>
-      <div class="kpi"><div class="kpi-lbl">Leads geral</div><div class="kpi-val" id="kLeadsGeral">—</div><div class="kpi-sub">pagos + orgânicos</div></div>
+      <div class="kpi"><div class="kpi-lbl">Leads totais</div><div class="kpi-val" id="kLeadsGeral">—</div><div class="kpi-sub">pagos + orgânicos</div></div>
       <div class="kpi"><div class="kpi-lbl">Leads pagos</div><div class="kpi-val" id="kLeadsPagos">—</div><div class="kpi-sub">medium contém “paid”</div></div>
       <div class="kpi"><div class="kpi-lbl">Leads orgânicos</div><div class="kpi-val" id="kLeadsOrg">—</div><div class="kpi-sub">medium sem “paid”</div></div>
     </div>
@@ -312,10 +312,10 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
   <div class="section" id="captacao-sec">
     <div class="section-head"><h2 class="section-title">Captação</h2><span class="section-tag">Custo por lead &amp; whatsapp</span></div>
     <div class="kpi-grid four">
-      <div class="kpi"><div class="kpi-lbl">CPL geral</div><div class="kpi-val"><span class="cur">$</span><span id="kCPLGeral">—</span></div><div class="kpi-sub">invest. total ÷ leads geral</div></div>
+      <div class="kpi"><div class="kpi-lbl">CPL geral</div><div class="kpi-val"><span class="cur">$</span><span id="kCPLGeral">—</span></div><div class="kpi-sub">invest. total ÷ leads totais</div></div>
       <div class="kpi"><div class="kpi-lbl">CPL pago</div><div class="kpi-val"><span class="cur">$</span><span id="kCPLPago">—</span></div><div class="kpi-sub">invest. captura ÷ leads pagos</div></div>
       <div class="kpi"><div class="kpi-lbl">Leads whatsapp</div><div class="kpi-val" id="kLeadsWpp">—</div><div class="kpi-sub">aba grupos</div></div>
-      <div class="kpi"><div class="kpi-lbl">% whatsapp</div><div class="kpi-val" id="kPctWpp">—</div><div class="kpi-sub">whatsapp ÷ leads geral</div></div>
+      <div class="kpi"><div class="kpi-lbl">% whatsapp</div><div class="kpi-val" id="kPctWpp">—</div><div class="kpi-sub">whatsapp ÷ leads totais</div></div>
     </div>
   </div>
   <!-- PESQUISA -->
@@ -323,7 +323,7 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
     <div class="section-head"><h2 class="section-title">Pesquisa de <em>boas-vindas</em></h2><span class="section-tag">Aba pesquisa</span></div>
     <div class="kpi-grid four">
       <div class="kpi"><div class="kpi-lbl">Respondentes</div><div class="kpi-val" id="pRespondentes">—</div><div class="kpi-sub">total de respostas</div></div>
-      <div class="kpi"><div class="kpi-lbl">% respondidas</div><div class="kpi-val" id="pPctRespondidas">—</div><div class="kpi-sub">respondentes ÷ leads geral</div></div>
+      <div class="kpi"><div class="kpi-lbl">% respondidas</div><div class="kpi-val" id="pPctRespondidas">—</div><div class="kpi-sub">respondentes ÷ leads totais</div></div>
       <div class="kpi"><div class="kpi-lbl">Renda acima de 1k</div><div class="kpi-val" id="pRendaAcima1k">—</div><div class="kpi-sub">rendimento mensal ≥ 1.000 €</div></div>
       <div class="kpi"><div class="kpi-lbl">% acima de 1k</div><div class="kpi-val" id="pPctAcima1k">—</div><div class="kpi-sub">acima de 1k ÷ total de respostas</div></div>
     </div>
@@ -644,32 +644,48 @@ function toNum(s){
   else str=str.replace(/,/g,'');
   const n=parseFloat(str); return isNaN(n)?0:n;
 }
-function normText(s){ const str=String(s||'').toLowerCase(); return str.normalize?str.normalize('NFD').replace(/[̀-ͯ]/g,''):str; }
-function isoFromMetaDay(s){ const m=String(s||'').trim().match(/^(\d{4})-(\d{2})-(\d{2})/); return m?m[0].slice(0,10):null; }
-// A aba crm mistura datas em formato BR (DD/MM/AAAA) com algumas linhas em MM/DD/AAAA
-// (provavelmente inseridas por uma automação com locale diferente). Quando os dois
-// primeiros números são ambíguos (ambos ≤12), escolhe a interpretação mais próxima
-// de hoje para manter um único padrão de data em todo o dashboard.
-function daysDiffFromToday(iso){
-  const d=asLocalDate(iso); if(!d) return Infinity;
-  const t=new Date(); t.setHours(0,0,0,0);
-  return Math.abs(Math.round((d-t)/86400000));
+function normText(s){ const str=String(s||'').toLowerCase(); return str.normalize?str.normalize('NFD').replace(/[\u0300-\u036f]/g,''):str; }
+function validISODate(y,m,d){
+  y=Number(y); m=Number(m); d=Number(d);
+  if(!y||m<1||m>12||d<1||d>31) return null;
+  const dt=new Date(y,m-1,d);
+  if(dt.getFullYear()!==y||dt.getMonth()!==m-1||dt.getDate()!==d) return null;
+  return String(y).padStart(4,'0')+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
 }
-function isoFromCrmData(s){
-  const str=String(s||'').trim();
-  const m=str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if(!m) return null;
-  const p1=parseInt(m[1],10), p2=parseInt(m[2],10), year=m[3];
-  const cands=[];
-  if(p2>=1&&p2<=12&&p1>=1&&p1<=31) cands.push(year+'-'+String(p2).padStart(2,'0')+'-'+String(p1).padStart(2,'0')); // DD/MM (padrão BR)
-  if(p1!==p2 && p1>=1&&p1<=12&&p2>=1&&p2<=31) cands.push(year+'-'+String(p1).padStart(2,'0')+'-'+String(p2).padStart(2,'0')); // MM/DD (fallback)
-  if(!cands.length) return null;
-  if(cands.length===1) return cands[0];
-  const diffs=cands.map(daysDiffFromToday);
-  return diffs[0]<=diffs[1] ? cands[0] : cands[1];
+// Aceita ISO, data/hora, DD/MM/AAAA, MM/DD/AAAA (quando inequívoco), DD-MM-AAAA
+// e números seriais do Google Sheets/Excel. Datas ambíguas com barras seguem o padrão BR.
+function isoFromAnyDate(s){
+  if(s===null||s===undefined||s==='') return null;
+  if(typeof s==='number' || /^\d+(?:[.,]\d+)?$/.test(String(s).trim())){
+    const serial=Number(String(s).replace(',','.'));
+    if(serial>20000 && serial<100000){
+      const dt=new Date(Date.UTC(1899,11,30)+Math.floor(serial)*86400000);
+      return validISODate(dt.getUTCFullYear(),dt.getUTCMonth()+1,dt.getUTCDate());
+    }
+  }
+  const str=String(s).trim();
+  let m=str.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})(?:[T\s]|$)/);
+  if(m) return validISODate(m[1],m[2],m[3]);
+  m=str.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})(?:[T\s]|$)/);
+  if(m){
+    const a=Number(m[1]), b=Number(m[2]), y=Number(m[3]);
+    if(a>12) return validISODate(y,b,a);       // DD/MM inequívoco
+    if(b>12) return validISODate(y,a,b);       // MM/DD inequívoco
+    return validISODate(y,b,a);                // ambíguo: padrão brasileiro DD/MM
+  }
+  m=str.match(/Date\((\d{4}),\s*(\d{1,2}),\s*(\d{1,2})/);
+  if(m) return validISODate(m[1],Number(m[2])+1,m[3]);
+  return null;
 }
+function isoFromMetaDay(s){ return isoFromAnyDate(s); }
+function isoFromCrmData(s){ return isoFromAnyDate(s); }
 function isCapturaCampaign(name){ return normText(name).includes('cap'); }
-function isPaidMedium(medium){ return normText(medium).includes('paid'); }
+function isPaidMedium(medium){
+  const t=normText(medium).replace(/[_.-]+/g,' ').trim();
+  if(!t) return false;
+  // Mantém a regra principal (contém “paid”) e cobre nomenclaturas comuns de mídia paga.
+  return /(^|\s)paid(\s|$)/.test(t) || /(^|\s)(cpc|ppc|paid social|social paid|meta ads|facebook ads|instagram ads|google ads)(\s|$)/.test(t);
+}
 function isQuenteCampaign(name){ return normText(name).includes('quente'); }
 function isFrioCampaign(name){ return normText(name).includes('frio'); }
 function isAcocCapCampaign(name){ const t=normText(name); return t.includes('acoc') && t.includes('cap'); }
@@ -687,6 +703,16 @@ function colFind(headers,patterns){
   for(const pat of patterns){ const f=headers.find(h=>pat.test(normText(h))); if(f) return f; }
   return null;
 }
+// Quando há mais de uma coluna semelhante, escolhe a que realmente possui mais dados.
+function colFindPopulated(headers,patterns,rows){
+  if(!headers||!headers.length) return null;
+  const candidates=headers.filter(h=>patterns.some(p=>p.test(normText(h))));
+  if(!candidates.length) return null;
+  return candidates.sort((a,b)=>{
+    const count=col=>(rows||[]).reduce((n,r)=>n+(String(r[col]??'').trim()!==''?1:0),0);
+    return count(b)-count(a);
+  })[0];
+}
 function detectColumns(){
   const mh=RAW.meta[0]?Object.keys(RAW.meta[0]):[];
   const ch=RAW.crm[0]?Object.keys(RAW.crm[0]):[];
@@ -699,12 +725,17 @@ function detectColumns(){
   COLS.metaClicks = colFind(mh,[/link.?clicks/]);
   COLS.metaImpr   = colFind(mh,[/impressions/]);
   COLS.metaSpend  = colFind(mh,[/amount.?spent/,/valor.?usado/,/investimento/]);
-  COLS.crmData    = colFind(ch,[/^data$/]);
-  COLS.crmCamp    = colFind(ch,[/campanha/]);
-  COLS.crmPublico = colFind(ch,[/publico/]);
-  COLS.crmCriativo= colFind(ch,[/criativo/]);
-  COLS.crmMedium  = colFind(ch,[/medium/]);
-  COLS.crmEmail   = colFind(ch,[/e-?mail/]);
+  COLS.crmData    = colFindPopulated(ch,[
+    /^data$/,/^date$/,/timestamp/,/created.?at/,/creation.?date/,/submitted.?at/,
+    /data.*(lead|cadastro|criacao|entrada|conversao|registro)/,
+    /(lead|cadastro|criacao|entrada|conversao|registro).*data/,
+    /hora.*(criacao|cadastro|envio|entrada)/
+  ],RAW.crm);
+  COLS.crmCamp    = colFindPopulated(ch,[/campanha/,/utm.?campaign/,/campaign/],RAW.crm);
+  COLS.crmPublico = colFindPopulated(ch,[/publico/,/audience/,/ad.?set/],RAW.crm);
+  COLS.crmCriativo= colFindPopulated(ch,[/criativo/,/utm.?content/,/^ad.?name$/,/anuncio/],RAW.crm);
+  COLS.crmMedium  = colFindPopulated(ch,[/^utm.?medium$/,/medium/,/midia/,/origem.*trafego/,/traffic.*source/],RAW.crm);
+  COLS.crmEmail   = colFindPopulated(ch,[/e-?mail/,/^email$/],RAW.crm);
   COLS.grupoTotal = colFind(gh,[/^total$/]);
   COLS.metaThumb    = colFind(mh,[/thumbnail/,/image.?url/,/\bthumb\b/]);
   COLS.metaPermalink= colFind(mh,[/instagram.?permalink/,/permalink/]);
@@ -841,9 +872,35 @@ function initDatePicker(){
 function getRange(){
   return { from:document.getElementById('dateFrom').value||DATE_MIN, to:document.getElementById('dateTo').value||DATE_MAX };
 }
-function filterMeta(f){ return RAW.meta.filter(r=>{ const d=isoFromMetaDay(r[COLS.metaDay]); return d && d>=f.from && d<=f.to; }); }
-function filterCrm(f){ return RAW.crm.filter(r=>{ const d=isoFromCrmData(r[COLS.crmData]); return d && d>=f.from && d<=f.to; }); }
-function filterPesquisa(f){ return RAW.pesquisa.filter(r=>{ const d=isoFromCrmData(r[COLS.pesqData]); return d && d>=f.from && d<=f.to; }); }
+function filterMeta(f){
+  if(!COLS.metaDay) return RAW.meta;
+  const parsed=RAW.meta.map(r=>({r,d:isoFromMetaDay(r[COLS.metaDay])}));
+  const valid=parsed.filter(x=>x.d);
+  if(!valid.length && RAW.meta.length){ console.warn('[a comunidade] Nenhuma data da Meta pôde ser interpretada; exibindo todas as linhas.'); return RAW.meta; }
+  return valid.filter(x=>x.d>=f.from&&x.d<=f.to).map(x=>x.r);
+}
+function filterCrm(f){
+  if(!COLS.crmData){
+    console.warn('[a comunidade] Coluna de data do CRM não detectada; exibindo todos os leads. Cabeçalhos:',RAW.crm[0]?Object.keys(RAW.crm[0]):[]);
+    return RAW.crm;
+  }
+  const parsed=RAW.crm.map(r=>({r,d:isoFromCrmData(r[COLS.crmData])}));
+  const valid=parsed.filter(x=>x.d);
+  if(!valid.length && RAW.crm.length){
+    console.warn('[a comunidade] Nenhuma data do CRM pôde ser interpretada; exibindo todos os leads. Coluna:',COLS.crmData);
+    return RAW.crm;
+  }
+  const invalidCount=parsed.length-valid.length;
+  if(invalidCount) console.warn('[a comunidade] '+invalidCount+' linha(s) do CRM sem data válida foram ignoradas no filtro de período.');
+  return valid.filter(x=>x.d>=f.from&&x.d<=f.to).map(x=>x.r);
+}
+function filterPesquisa(f){
+  if(!COLS.pesqData) return RAW.pesquisa;
+  const parsed=RAW.pesquisa.map(r=>({r,d:isoFromCrmData(r[COLS.pesqData])}));
+  const valid=parsed.filter(x=>x.d);
+  if(!valid.length && RAW.pesquisa.length) return RAW.pesquisa;
+  return valid.filter(x=>x.d>=f.from&&x.d<=f.to).map(x=>x.r);
+}
 // "Menos de X" sempre fica abaixo; caso contrário usa o primeiro número da faixa (limite inferior)
 // como referência — cobre "1.000 € a 2.000 €", "2.000 € a 3.500 €", "Mais de X", etc.
 function parseIncomeAbove1k(text){
@@ -1048,7 +1105,7 @@ function renderSecondaryCharts(meta,crm){
     o.lpv+=toNum(r[COLS.metaLPV]); o.spend+=toNum(r[COLS.metaSpend]);
   });
   crm.forEach(r=>{
-    if(!isPaidMedium(r[COLS.crmMedium])) return;
+    if(!isPaidMedium(COLS.crmMedium?r[COLS.crmMedium]:'')) return;
     const d=isoFromCrmData(r[COLS.crmData]); if(!d) return;
     const o=byDay[d]=byDay[d]||{impr:0,clicks:0,lpv:0,spend:0,leads:0};
     o.leads+=1;
@@ -1074,10 +1131,12 @@ function render(){
   let investCap=0, investRmkt=0;
   meta.forEach(r=>{ const sp=toNum(r[COLS.metaSpend]); if(isCapturaCampaign(r[COLS.metaCamp])) investCap+=sp; else investRmkt+=sp; });
   const investTotal=investCap+investRmkt;
-  // Leads (crm)
+  // Leads (CRM): cada linha válida representa um lead.
+  // Pago = medium de mídia paga; orgânico = demais valores, inclusive medium vazio.
   let leadsPagos=0, leadsOrg=0;
-  crm.forEach(r=>{ if(isPaidMedium(r[COLS.crmMedium])) leadsPagos++; else leadsOrg++; });
-  const leadsGeral=leadsPagos+leadsOrg;
+  crm.forEach(r=>{ if(isPaidMedium(COLS.crmMedium?r[COLS.crmMedium]:'')) leadsPagos++; else leadsOrg++; });
+  const leadsGeral=crm.length;
+  console.log('[a comunidade] Leads no período:',{total:leadsGeral,pagos:leadsPagos,organicos:leadsOrg,colunaData:COLS.crmData,colunaMedium:COLS.crmMedium});
   // Whatsapp (aba grupos — usa o maior total informado; não soma linhas acumuladas)
   let leadsWpp=0;
   RAW.grupos.forEach(r=>{ leadsWpp=Math.max(leadsWpp,toNum(r[COLS.grupoTotal])); });
@@ -1209,7 +1268,7 @@ function renderDailyTable(meta,crm,investCapTotal,leadsPagosTotal){
   crm.forEach(r=>{
     const d=isoFromCrmData(r[COLS.crmData]); if(!d) return;
     const day=byDay[d]=byDay[d]||{day:d,custo:0,leadsGeral:0,leadsPagos:0,leadsOrg:0};
-    if(isPaidMedium(r[COLS.crmMedium])){ day.leadsPagos++; } else { day.leadsOrg++; }
+    if(isPaidMedium(COLS.crmMedium?r[COLS.crmMedium]:'')){ day.leadsPagos++; } else { day.leadsOrg++; }
     day.leadsGeral++;
   });
   DAILY_ROWS=Object.values(byDay).map(d=>({
