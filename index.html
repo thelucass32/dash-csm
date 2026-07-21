@@ -535,8 +535,6 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
 "use strict";
 // ═══ CONFIG ═══
 const URLS = {
-  // O gid=0 desta planilha está vazio. Mantemos a URL-base e procuramos
-  // automaticamente a aba de mídia pelo nome via GViz (ver fetchMetaCSV).
   meta:   'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8G-glBbuXTjMwVdWWdY5dFd0jviPmpPIEC-nTyjlIipevft5Et_ieY0hJSacMiauoM9RQBWx08ZV0/pub?gid=0&single=true&output=csv',
   grupos: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8G-glBbuXTjMwVdWWdY5dFd0jviPmpPIEC-nTyjlIipevft5Et_ieY0hJSacMiauoM9RQBWx08ZV0/pub?gid=1999287374&single=true&output=csv',
   crm:    'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ8G-glBbuXTjMwVdWWdY5dFd0jviPmpPIEC-nTyjlIipevft5Et_ieY0hJSacMiauoM9RQBWx08ZV0/pub?gid=1820178885&single=true&output=csv',
@@ -595,13 +593,10 @@ async function fetchCSV(url){
   }
   return await fetchCSVViaGviz(url);
 }
-function gvizUrlFromPublishedCsv(url,sheetName){
+function gvizUrlFromPublishedCsv(url){
   const u=new URL(url); const gid=u.searchParams.get('gid')||'0';
   const base=url.replace(/\/pub.*$/,'');
-  const target=sheetName
-    ? 'sheet='+encodeURIComponent(sheetName)
-    : 'gid='+encodeURIComponent(gid);
-  return base+'/gviz/tq?tqx=out:json&'+target+'&_='+Date.now();
+  return base+'/gviz/tq?tqx=out:json&gid='+encodeURIComponent(gid)+'&_='+Date.now();
 }
 function csvEscape(v){ const s=String(v??''); return /[",\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }
 function gvizCellValue(cell){
@@ -620,10 +615,9 @@ function gvizResponseToCSV(resp){
   return lines.join('\n');
 }
 let GVIZ_CHAIN=Promise.resolve();
-function fetchCSVViaGviz(url,sheetName){
-  // Recupera a fila caso uma tentativa anterior de aba tenha falhado.
-  GVIZ_CHAIN=GVIZ_CHAIN.catch(()=>{}).then(()=>new Promise((resolve,reject)=>{
-    const gvizUrl=gvizUrlFromPublishedCsv(url,sheetName);
+function fetchCSVViaGviz(url){
+  GVIZ_CHAIN=GVIZ_CHAIN.then(()=>new Promise((resolve,reject)=>{
+    const gvizUrl=gvizUrlFromPublishedCsv(url);
     window.google=window.google||{}; window.google.visualization=window.google.visualization||{}; window.google.visualization.Query=window.google.visualization.Query||{};
     const oldHandler=window.google.visualization.Query.setResponse;
     const script=document.createElement('script'); let done=false;
@@ -637,71 +631,6 @@ function fetchCSVViaGviz(url,sheetName){
     script.src=gvizUrl; document.head.appendChild(script);
   }));
   return GVIZ_CHAIN;
-}
-
-// A primeira aba publicada (gid=0) está vazia. Esta validação impede que um
-// CSV sem dados seja aceito como se fosse a fonte Meta e tenta nomes comuns.
-const META_SHEET_NAMES=['Meta','META','Meta Ads','Marketing','Mídia','Midia'];
-function isUsableMetaCSV(text){
-  const rows=parseCSV(text);
-  if(rows.length<2) return false;
-  const headers=(rows[0]||[]).map(normText);
-  const hasDay=headers.some(h=>/^(day|data|dia)$/.test(h));
-  const hasSpend=headers.some(h=>/amount.?spent|valor.?usado|investimento|spend|cost/.test(h));
-  const hasCampaign=headers.some(h=>/campaign.?name|campanha/.test(h));
-  const dataRows=rows.slice(1).filter(r=>r.some(v=>String(v||'').trim()!==''));
-  return dataRows.length>0 && hasDay && hasSpend && hasCampaign;
-}
-async function discoverPublishedGids(url){
-  const base=url.replace(/\/pub.*$/,'');
-  const pubhtml=base+'/pubhtml?_='+Date.now();
-  for(const proxy of PROXIES){
-    try{
-      const r=await fetch(proxy(pubhtml),{cache:'no-store'});
-      if(!r.ok) continue;
-      const html=await r.text();
-      const gids=[...html.matchAll(/(?:[?#&]gid=|\bgid["']?\s*[:=]\s*["']?)(\d+)/gi)].map(m=>m[1]);
-      const unique=[...new Set(gids)].filter(g=>g!=='0').slice(0,30);
-      if(unique.length) return unique;
-    }catch(e){}
-  }
-  return [];
-}
-async function fetchMetaCSV(){
-  let firstResult='';
-  try{
-    firstResult=await fetchCSV(URLS.meta);
-    if(isUsableMetaCSV(firstResult)) return firstResult;
-    console.warn('[a comunidade] gid=0 não contém dados válidos da Meta; procurando a aba correta…');
-  }catch(err){
-    console.warn('[a comunidade] Falha ao abrir gid=0 da Meta; procurando a aba correta…',err);
-  }
-  for(const sheetName of META_SHEET_NAMES){
-    try{
-      const csv=await fetchCSVViaGviz(URLS.meta,sheetName);
-      if(isUsableMetaCSV(csv)){
-        console.log('[a comunidade] Aba Meta encontrada via GViz pelo nome:',sheetName);
-        return csv;
-      }
-    }catch(err){
-      console.warn('[a comunidade] Aba não localizada pelo nome:',sheetName);
-    }
-  }
-  const discoveredGids=await discoverPublishedGids(URLS.meta);
-  for(const gid of discoveredGids){
-    try{
-      const candidateUrl=new URL(URLS.meta);
-      candidateUrl.searchParams.set('gid',gid);
-      const csv=await fetchCSVViaGviz(candidateUrl.toString());
-      if(isUsableMetaCSV(csv)){
-        console.log('[a comunidade] Aba Meta encontrada automaticamente no gid:',gid);
-        return csv;
-      }
-    }catch(err){
-      console.warn('[a comunidade] gid publicado sem estrutura de Meta:',gid);
-    }
-  }
-  throw new Error('A fonte Meta está vazia, não está publicada ou não possui as colunas Data, Campanha e Investimento. Publique a aba e informe o gid correto em URLS.meta.');
 }
 // ═══ HELPERS ═══
 const fmtN=n=>new Intl.NumberFormat('pt-BR').format(Math.round(n||0));
@@ -828,7 +757,7 @@ function detectColumns(){
 async function loadData(){
   setStatus('loading','Carregando dados…');
   try{
-    const [m,g,c,q,a]=await Promise.all([fetchMetaCSV(),fetchCSV(URLS.grupos),fetchCSV(URLS.crm),fetchCSV(URLS.pesquisa),fetchCSV(URLS.acomp)]);
+    const [m,g,c,q,a]=await Promise.all([fetchCSV(URLS.meta),fetchCSV(URLS.grupos),fetchCSV(URLS.crm),fetchCSV(URLS.pesquisa),fetchCSV(URLS.acomp)]);
     RAW.meta=cleanRows(csvToObjects(m),'Meta');
     RAW.grupos=cleanRows(csvToObjects(g),'Grupos (whatsapp)');
     RAW.crm=cleanRows(csvToObjects(c),'CRM');
