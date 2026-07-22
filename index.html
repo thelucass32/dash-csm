@@ -314,7 +314,7 @@ h1,h2,h3{font-family:var(--font);color:var(--title);font-weight:700;}
     <div class="kpi-grid four">
       <div class="kpi"><div class="kpi-lbl">CPL geral</div><div class="kpi-val"><span class="cur">$</span><span id="kCPLGeral">—</span></div><div class="kpi-sub">invest. total ÷ leads totais</div></div>
       <div class="kpi"><div class="kpi-lbl">CPL pago</div><div class="kpi-val"><span class="cur">$</span><span id="kCPLPago">—</span></div><div class="kpi-sub">invest. captura ÷ leads pagos</div></div>
-      <div class="kpi"><div class="kpi-lbl">Leads whatsapp</div><div class="kpi-val" id="kLeadsWpp">—</div><div class="kpi-sub">aba grupos</div></div>
+      <div class="kpi"><div class="kpi-lbl">Leads whatsapp</div><div class="kpi-val" id="kLeadsWpp">—</div><div class="kpi-sub">aba grupos · no período</div></div>
       <div class="kpi"><div class="kpi-lbl">% whatsapp</div><div class="kpi-val" id="kPctWpp">—</div><div class="kpi-sub">whatsapp ÷ leads totais</div></div>
     </div>
   </div>
@@ -544,6 +544,7 @@ const URLS = {
 let RAW={meta:[],grupos:[],crm:[],pesquisa:[],acomp:[]};
 let COLS={};
 let DATE_MIN='', DATE_MAX='';
+let DATE_ORDER={meta:'MDY',crm:'MDY',pesquisa:'MDY',grupos:'MDY'};
 let DP={viewDate:null,draftFrom:'',draftTo:'',draftPreset:'all'};
 let chartInstance=null;
 let DAILY_ROWS=[], DAILY_TOTALS=null;
@@ -652,9 +653,10 @@ function validISODate(y,m,d){
   if(dt.getFullYear()!==y||dt.getMonth()!==m-1||dt.getDate()!==d) return null;
   return String(y).padStart(4,'0')+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');
 }
-// Aceita ISO, data/hora, DD/MM/AAAA, MM/DD/AAAA (quando inequívoco), DD-MM-AAAA
-// e números seriais do Google Sheets/Excel. Datas ambíguas com barras seguem o padrão BR.
-function isoFromAnyDate(s){
+// Aceita ISO, data/hora, DD/MM/AAAA, MM/DD/AAAA, DD-MM-AAAA
+// e números seriais do Google Sheets/Excel. Para datas ambíguas (ex.: 07/10/2026),
+// a ordem é inferida separadamente em cada fonte usando as datas inequívocas da própria coluna.
+function isoFromAnyDate(s,ambiguousOrder='DMY'){
   if(s===null||s===undefined||s==='') return null;
   if(typeof s==='number' || /^\d+(?:[.,]\d+)?$/.test(String(s).trim())){
     const serial=Number(String(s).replace(',','.'));
@@ -669,16 +671,32 @@ function isoFromAnyDate(s){
   m=str.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})(?:[T\s]|$)/);
   if(m){
     const a=Number(m[1]), b=Number(m[2]), y=Number(m[3]);
-    if(a>12) return validISODate(y,b,a);       // DD/MM inequívoco
-    if(b>12) return validISODate(y,a,b);       // MM/DD inequívoco
-    return validISODate(y,b,a);                // ambíguo: padrão brasileiro DD/MM
+    if(a>12 && b<=12) return validISODate(y,b,a); // DD/MM inequívoco
+    if(b>12 && a<=12) return validISODate(y,a,b); // MM/DD inequívoco
+    return ambiguousOrder==='MDY' ? validISODate(y,a,b) : validISODate(y,b,a);
   }
   m=str.match(/Date\((\d{4}),\s*(\d{1,2}),\s*(\d{1,2})/);
   if(m) return validISODate(m[1],Number(m[2])+1,m[3]);
   return null;
 }
-function isoFromMetaDay(s){ return isoFromAnyDate(s); }
-function isoFromCrmData(s){ return isoFromAnyDate(s); }
+function inferDateOrder(rows,col,fallback='MDY'){
+  if(!col) return fallback;
+  let mdy=0,dmy=0;
+  (rows||[]).forEach(r=>{
+    const str=String(r[col]??'').trim();
+    const m=str.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-]\d{4}(?:[T\s]|$)/);
+    if(!m) return;
+    const a=Number(m[1]),b=Number(m[2]);
+    if(a>12 && b<=12) dmy++;
+    else if(b>12 && a<=12) mdy++;
+  });
+  if(mdy===dmy) return fallback;
+  return mdy>dmy?'MDY':'DMY';
+}
+function isoFromMetaDay(s){ return isoFromAnyDate(s,DATE_ORDER.meta); }
+function isoFromCrmData(s){ return isoFromAnyDate(s,DATE_ORDER.crm); }
+function isoFromPesquisaData(s){ return isoFromAnyDate(s,DATE_ORDER.pesquisa); }
+function isoFromGrupoData(s){ return isoFromAnyDate(s,DATE_ORDER.grupos); }
 function isCapturaCampaign(name){ return normText(name).includes('cap'); }
 function isPaidMedium(medium){
   const t=normText(medium).replace(/[_.-]+/g,' ').trim();
@@ -736,6 +754,7 @@ function detectColumns(){
   COLS.crmCriativo= colFindPopulated(ch,[/criativo/,/utm.?content/,/^ad.?name$/,/anuncio/],RAW.crm);
   COLS.crmMedium  = colFindPopulated(ch,[/^utm.?medium$/,/medium/,/midia/,/origem.*trafego/,/traffic.*source/],RAW.crm);
   COLS.crmEmail   = colFindPopulated(ch,[/e-?mail/,/^email$/],RAW.crm);
+  COLS.grupoData  = colFindPopulated(gh,[/^data$/,/^date$/,/^day$/,/^dia$/,/timestamp/],RAW.grupos);
   COLS.grupoTotal = colFind(gh,[/^total$/]);
   COLS.metaThumb    = colFind(mh,[/thumbnail/,/image.?url/,/\bthumb\b/]);
   COLS.metaPermalink= colFind(mh,[/instagram.?permalink/,/permalink/]);
@@ -747,6 +766,11 @@ function detectColumns(){
   COLS.pesqProfissional= colFind(qh,[/profissional/]);
   COLS.pesqRenda       = colFind(qh,[/rendimento/]);
   COLS.pesqSaude       = colFind(qh,[/sa[uú]de/,/bem.?estar/]);
+  DATE_ORDER.meta= inferDateOrder(RAW.meta,COLS.metaDay,'MDY');
+  DATE_ORDER.crm= inferDateOrder(RAW.crm,COLS.crmData,'MDY');
+  DATE_ORDER.pesquisa= inferDateOrder(RAW.pesquisa,COLS.pesqData,'MDY');
+  DATE_ORDER.grupos= inferDateOrder(RAW.grupos,COLS.grupoData,'MDY');
+  console.log('%c[a comunidade] Ordem das datas inferida:','color:#12B60F;font-weight:bold',DATE_ORDER);
   console.log('%c[a comunidade] Colunas detectadas:','color:#12B60F;font-weight:bold',COLS);
   console.log('[a comunidade] Cabeçalhos meta:',mh);
   console.log('[a comunidade] Cabeçalhos crm:',ch);
@@ -784,9 +808,11 @@ function computeDateBounds(){
   const all=[];
   RAW.meta.forEach(r=>{ const d=isoFromMetaDay(r[COLS.metaDay]); if(d) all.push(d); });
   RAW.crm.forEach(r=>{ const d=isoFromCrmData(r[COLS.crmData]); if(d) all.push(d); });
-  RAW.pesquisa.forEach(r=>{ const d=isoFromCrmData(r[COLS.pesqData]); if(d) all.push(d); });
+  RAW.pesquisa.forEach(r=>{ const d=isoFromPesquisaData(r[COLS.pesqData]); if(d) all.push(d); });
+  RAW.grupos.forEach(r=>{ const d=isoFromGrupoData(r[COLS.grupoData]); if(d) all.push(d); });
   if(!all.length){ DATE_MIN=toISO(offsetDay(new Date(),-30)); DATE_MAX=toISO(new Date()); return; }
   all.sort(); DATE_MIN=all[0]; DATE_MAX=all[all.length-1];
+  console.log('[a comunidade] Limites de data corrigidos:',{DATE_MIN,DATE_MAX,ordens:DATE_ORDER});
 }
 function presetRange(preset){
   const toD=asLocalDate(DATE_MAX)||new Date();
@@ -896,10 +922,34 @@ function filterCrm(f){
 }
 function filterPesquisa(f){
   if(!COLS.pesqData) return RAW.pesquisa;
-  const parsed=RAW.pesquisa.map(r=>({r,d:isoFromCrmData(r[COLS.pesqData])}));
+  const parsed=RAW.pesquisa.map(r=>({r,d:isoFromPesquisaData(r[COLS.pesqData])}));
   const valid=parsed.filter(x=>x.d);
   if(!valid.length && RAW.pesquisa.length) return RAW.pesquisa;
   return valid.filter(x=>x.d>=f.from&&x.d<=f.to).map(x=>x.r);
+}
+function whatsappLeadsInRange(f){
+  if(!COLS.grupoTotal) return 0;
+  if(!COLS.grupoData){
+    let fallback=0;
+    RAW.grupos.forEach(r=>{ fallback=Math.max(fallback,toNum(r[COLS.grupoTotal])); });
+    console.warn('[a comunidade] Coluna de data da aba grupos não detectada; usando o maior total geral:',fallback);
+    return fallback;
+  }
+  const parsed=RAW.grupos
+    .map(r=>({d:isoFromGrupoData(r[COLS.grupoData]),total:toNum(r[COLS.grupoTotal])}))
+    .filter(x=>x.d)
+    .sort((a,b)=>a.d.localeCompare(b.d));
+  if(!parsed.length) return 0;
+  // A coluna "total" é acumulada. Para o período, calcula o saldo entre o fim
+  // do intervalo e o último acumulado anterior à data inicial.
+  let endTotal=0,beforeTotal=0;
+  parsed.forEach(x=>{
+    if(x.d<=f.to) endTotal=Math.max(endTotal,x.total);
+    if(x.d<f.from) beforeTotal=Math.max(beforeTotal,x.total);
+  });
+  const result=Math.max(0,endTotal-beforeTotal);
+  console.log('[a comunidade] WhatsApp no período:',{from:f.from,to:f.to,endTotal,beforeTotal,totalPeriodo:result,colunaData:COLS.grupoData});
+  return result;
 }
 // "Menos de X" sempre fica abaixo; caso contrário usa o primeiro número da faixa (limite inferior)
 // como referência — cobre "1.000 € a 2.000 €", "2.000 € a 3.500 €", "Mais de X", etc.
@@ -1137,9 +1187,8 @@ function render(){
   crm.forEach(r=>{ if(isPaidMedium(COLS.crmMedium?r[COLS.crmMedium]:'')) leadsPagos++; else leadsOrg++; });
   const leadsGeral=crm.length;
   console.log('[a comunidade] Leads no período:',{total:leadsGeral,pagos:leadsPagos,organicos:leadsOrg,colunaData:COLS.crmData,colunaMedium:COLS.crmMedium});
-  // Whatsapp (aba grupos — usa o maior total informado; não soma linhas acumuladas)
-  let leadsWpp=0;
-  RAW.grupos.forEach(r=>{ leadsWpp=Math.max(leadsWpp,toNum(r[COLS.grupoTotal])); });
+  // Whatsapp (aba grupos): respeita o filtro e calcula a variação do total acumulado.
+  const leadsWpp=whatsappLeadsInRange(f);
   const pctWpp=leadsGeral>0?leadsWpp/leadsGeral:0;
   const cplGeral=leadsGeral>0?investTotal/leadsGeral:0;
   const cplPago=leadsPagos>0?investCap/leadsPagos:0;
@@ -1210,7 +1259,7 @@ function render(){
   console.log('%c[a comunidade] RENDER ('+f.from+' → '+f.to+')','color:#12B60F;font-weight:bold');
   console.log('  Investimento total: $ '+fmtN(investTotal)+' (captura $ '+fmtN(investCap)+' + rmkt $ '+fmtN(investRmkt)+')');
   console.log('  Leads geral: '+leadsGeral+' (pagos '+leadsPagos+' + org '+leadsOrg+')');
-  console.log('  Leads whatsapp (aba grupos, maior total informado): '+leadsWpp);
+  console.log('  Leads whatsapp no período (aba grupos): '+leadsWpp);
 }
 function renderFunnelBars(containerId,stages,empty){
   const wrap=document.getElementById(containerId);
